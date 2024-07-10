@@ -1,0 +1,4 @@
+# all false positives
+python3-fitz: spelling-error-in-binary locaE locate [usr/lib/python3/dist-packages/fitz_old/_fitz_old.cpython-*.so]
+python3-fitz: spelling-error-in-binary moR more [usr/lib/python3/dist-packages/fitz_old/_fitz_old.cpython-*.so]
+

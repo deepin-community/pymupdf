@@ -1,0 +1,21 @@
+From: Bastian Germann <bage@debian.org>
+Date: Sat, 30 Oct 2021 10:51:22 +0200
+Subject: Prevent docs build warnings
+
+---
+ docs/conf.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/docs/conf.py b/docs/conf.py
+index fe29d40..357aa2b 100644
+--- a/docs/conf.py
++++ b/docs/conf.py
+@@ -153,7 +153,7 @@ html_favicon = "_static/PyMuPDF.ico"
+ # Add any paths that contain custom static files (such as style sheets) here,
+ # relative to this directory. They are copied after the builtin static files,
+ # so a file named "default.css" will overwrite the builtin "default.css".
+-html_static_path = ["_static"]
++html_static_path = []
+ html_theme_options = {
+     "light_logo": "pymupdf-sidebar-logo-dark.png",
+     "dark_logo": "pymupdf-sidebar-logo-light.png",
