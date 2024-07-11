@@ -1,0 +1,26 @@
+From: Johannes 'josch' Schauer <josch@debian.org>
+Date: Sun, 23 Feb 2020 19:10:35 +0100
+Forwarded: not-needed
+Subject: add additional import statement as otherwise you'd get:
+
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "[...]/src/fitz/__init__.py", line 3, in <module>
+    from fitz.fitz import *
+ModuleNotFoundError: No module named 'fitz.fitz'
+---
+ fitz/__init__.py | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/fitz/__init__.py b/fitz/__init__.py
+index e380cec..dfb4fbd 100644
+--- a/fitz/__init__.py
++++ b/fitz/__init__.py
+@@ -7,6 +7,7 @@
+ # maintained and developed by Artifex Software, Inc. https://artifex.com.
+ # ------------------------------------------------------------------------
+ import sys
++import fitz.fitz as fitz
+
+ import glob
+ import os
