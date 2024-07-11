@@ -1,0 +1,3 @@
+fitz/fitz.py
+fitz/fitz_wrap.c
+fitz/helper-git-versions.i

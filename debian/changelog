@@ -1,5 +1,149 @@
-template-repository (1.0-1) unstable; urgency=medium
+pymupdf (1.23.7+ds1-1) unstable; urgency=medium
 
-  * Initial release
+  * Team upload
+  * Clean helper-git-versions.i (Closes: #1046144)
+  * New upstream version 1.23.7+ds1 (Closes: #1057402)
+  * Make sure the package builds with the new build system
 
- -- Tsic404 <liuheng@deepin.org>  Sat, 28 Jan 2023 13:46:49 +0800
+ -- Bastian Germann <bage@debian.org>  Sat, 16 Dec 2023 19:43:12 +0100
+
+pymupdf (1.22.5+ds1-1) unstable; urgency=medium
+
+  * Team upload
+  * New upstream version 1.22.5+ds1 (Closes: #1038758)
+  * Drop build fix for non-Linux platforms
+
+ -- Bastian Germann <bage@debian.org>  Thu, 29 Jun 2023 01:14:36 +0200
+
+pymupdf (1.21.1+ds1-1) unstable; urgency=medium
+
+  * New upstream version 1.21.1
+  * Rebase patches (dropping an upstream one)
+
+ -- Bastian Germann <bage@debian.org>  Thu, 15 Dec 2022 21:22:02 +0100
+
+pymupdf (1.21.0+ds1-2) unstable; urgency=medium
+
+  * Team upload
+
+  [ Helmut Grohne ]
+  * Fix FTCBFS: Missig Build-Depends: libpython3-all-dev (Closes: #1021037)
+
+ -- Jelmer Vernooĳ <jelmer@debian.org>  Wed, 14 Dec 2022 21:38:56 +0000
+
+pymupdf (1.21.0+ds1-1) unstable; urgency=medium
+
+  * Team upload
+  * New upstream version 1.21.0+ds1
+  * Patch: Set unix_build_type for unconditional use
+
+ -- Bastian Germann <bage@debian.org>  Tue, 08 Nov 2022 21:28:46 +0100
+
+pymupdf (1.20.1+ds1-1) unstable; urgency=medium
+
+  * Allow crossbuilding by fixing build deps
+  * Add bage's copyright
+  * New upstream version 1.20.1+ds1
+  * Raise libmupdf-dev dep version
+  * Make new version build (new env var, patch rebase)
+  * Add new version's copyright
+
+ -- Bastian Germann <bage@debian.org>  Fri, 01 Jul 2022 00:28:49 +0200
+
+pymupdf (1.19.2+ds1-1) unstable; urgency=medium
+
+  * New upstream version 1.19.2+ds1
+  * Drop upstream patch: Link shared library with additional libs
+
+ -- Bastian Germann <bage@debian.org>  Sat, 27 Nov 2021 13:39:24 +0100
+
+pymupdf (1.19.1+ds1-2) unstable; urgency=medium
+
+  * Team upload
+  * Add gumbo build dependency
+
+ -- Bastian Germann <bage@debian.org>  Sat, 30 Oct 2021 12:25:54 +0200
+
+pymupdf (1.19.1+ds1-1) unstable; urgency=medium
+
+  * Team upload
+
+  [ Ondřej Nový ]
+  * d/control: Update Maintainer field with new Debian Python Team
+    contact address.
+  * d/control: Update Vcs-* fields with new Debian Python Team Salsa
+    layout.
+
+  [ Debian Janitor ]
+  * Set upstream metadata fields: Bug-Database, Bug-Submit.
+  * Update standards version to 4.5.1, no changes needed.
+
+  [ Bastian Germann ]
+  * autopkgtest: Mark superficial (Closes: #970964)
+  * New upstream version 1.19.1+ds1
+  * d/copyright: license change to AGPL
+  * Rebase patches
+
+ -- Bastian Germann <bage@debian.org>  Sat, 30 Oct 2021 10:37:35 +0200
+
+pymupdf (1.17.4+ds1-2) unstable; urgency=medium
+
+  * Team upload
+
+  [ Nicholas D Steeves ]
+  * Mention PyMuPDF in long description so that a user who 'apt search
+    pymupdf' will discover this package.
+
+  [ Bastian Germann ]
+  * Fix imports and shared libs for non-Linux platforms
+  * Clean generated files
+
+  [ Sergio Durigan Junior ]
+  * d/control: Bump debhelper-compat to 13.
+  * d/control: Remove duplicate field "Priority" from python3-fitz.
+
+ -- Bastian Germann <bastiangermann@fishpost.de>  Sun, 23 Aug 2020 21:15:38 +0200
+
+pymupdf (1.17.4+ds1-1) unstable; urgency=medium
+
+  * Team upload
+  * Use debhelper provided python3:Provides
+  * Set Built-Using according to Policy 7.8 (Closes: #959958)
+  * Update upstream copyright info
+  * New upstream version 1.17.4+ds1
+  * Refresh docs patch
+  * Let dependency fit the new mupdf version
+  * Add build dependency libmujs-dev
+  * Add mujs to libs patch
+
+ -- Bastian Germann <bastiangermann@fishpost.de>  Fri, 07 Aug 2020 13:03:11 +0200
+
+pymupdf (1.16.11-1) unstable; urgency=medium
+
+  [ Johannes 'josch' Schauer ]
+  * New upstream version 1.16.11 (closes: #950639)
+  * Bump Standards-Version to 4.5.0
+  * add debian/salsa-ci.yml
+  * debian/control: b-d on libpython3-all-dev instead of libpython3-dev
+  * debian/copyright: remove unused files from Files-Excluded
+  * add autopkgtest
+  * add patch fiximport
+  * debian/control: add Rules-Requires-Root: no
+  * debian/tests/control: chdir to / to not use fitz module from unpacked
+    sources
+  * add debian/python3-fitz.lintian-overrides
+  * debian/watch: add repacksuffix
+  * debian/watch: don't run uupdate
+
+  [ Bastian Germann ]
+  * Drop non-existing examples
+  * Exclude 1.16.11 files
+  * Add docs patch
+
+ -- Johannes 'josch' Schauer <josch@debian.org>  Sun, 23 Feb 2020 21:05:36 +0100
+
+pymupdf (1.14.16-1) unstable; urgency=medium
+
+  * Initial release. (Closes: #930761)
+
+ -- Johannes 'josch' Schauer <josch@debian.org>  Sat, 22 Jun 2019 04:02:32 +0200

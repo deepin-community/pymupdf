@@ -1,4 +1,15 @@
 #!/usr/bin/make -f
 
+export PYMUPDF_SETUP_MUPDF_BUILD=
+export PYMUPDF_SETUP_IMPLEMENTATIONS=a
+export PYMUPDF_INCLUDES=/usr/include:/usr/include/mupdf:/usr/include/freetype2
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+DPKG_EXPORT_BUILDFLAGS = 1
+include /usr/share/dpkg/buildflags.mk
+export LDFLAGS+=-lmupdf -lmupdf-third -ljbig2dec -lopenjp2 -ljpeg -lfreetype -lgumbo -lharfbuzz -lpng16 -lmujs
+
+override_dh_gencontrol:
+	dh_gencontrol -- -VBuilt-Using="$(shell dpkg-query -f '$${source:Package} (= $${source:Version}), ' -W libmupdf-dev)"
+
 %:
-	dh $@
+	dh $@ --buildsystem=pybuild --with python3
