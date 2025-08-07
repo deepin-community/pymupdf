@@ -182,8 +182,10 @@ As mentioned, using these functions is ever only needed, if the text is **not wr
 
 
 .. image:: images/img-textpage.*
-   :scale: 66
 
+..
+  We used to do `:scale: 66` here, but current (2024-04-22) sphinx messes up
+  the aspect ratio.
 
 Page Dictionary
 ~~~~~~~~~~~~~~~~~
@@ -200,28 +202,25 @@ Block Dictionaries
 ~~~~~~~~~~~~~~~~~~
 Block dictionaries come in two different formats for **image blocks** and for **text blocks**.
 
-* *(Changed in v1.18.0)* -- new dict key *number*, the block number.
-* *(Changed in v1.18.11)* -- new dict key *transform*, the image transformation matrix for image blocks.
-* *(Changed in v1.18.11)* -- new dict key *size*, the size of the image in bytes for image blocks.
-
 **Image block:**
 
 =============== ===============================================================
 **Key**             **Value**
 =============== ===============================================================
-type            1 = image *(int)*
+type            1 = image (``int``)
 bbox            image bbox on page (:data:`rect_like`)
-number          block count *(int)*
-ext             image type *(str)*, as file extension, see below
-width           original image width *(int)*
-height          original image height *(int)*
-colorspace      colorspace component count *(int)*
-xres            resolution in x-direction *(int)*
-yres            resolution in y-direction *(int)*
-bpc             bits per component *(int)*
+number          block count (``int``)
+ext             image type (``str``), as file extension, see below
+width           original image width (``int``)
+height          original image height (``int``)
+colorspace      colorspace component count (``int``)
+xres            resolution in x-direction (``int``)
+yres            resolution in y-direction (``int``)
+bpc             bits per component (``int``)
 transform       matrix transforming image rect to bbox (:data:`matrix_like`)
-size            size of the image in bytes *(int)*
-image           image content *(bytes)*
+size            size of the image in bytes (``int``)
+image           image content (``bytes``)
+mask            image mask content (``bytes``) for transparent images
 =============== ===============================================================
 
 Possible values of the "ext" key are "bmp", "gif", "jpeg", "jpx" (JPEG 2000), "jxr" (JPEG XR), "png", "pnm", and "tiff".
@@ -237,7 +236,13 @@ Possible values of the "ext" key are "bmp", "gif", "jpeg", "jpx" (JPEG 2000), "j
        - Image blocks in a textpage are generated for **every** image location -- whether or not there are any duplicates. This is in contrast to :meth:`Page.get_images`, which will list each image only once (per reference name).
        - Images mentioned in the page's :data:`object` definition will **always** appear in :meth:`Page.get_images` [#f1]_. But it may happen, that there is no "display" command in the page's :data:`contents` (erroneously or on purpose). In this case the image will **not appear** in the textpage.
 
-   3. The image's "transformation matrix" is defined as the matrix, for which the expression `bbox / transform == fitz.Rect(0, 0, 1, 1)` is true, lookup details here: :ref:`ImageTransformation`.
+   3. The image's "transformation matrix" is defined as the matrix, for which the expression `bbox / transform == pymupdf.Rect(0, 0, 1, 1)` is true, lookup details here: :ref:`ImageTransformation`.
+
+   4. A transparent image may be accompanied by a mask image. This is stored under key `"mask"` and has the format of a `DeviceGray` PNG image. Otherwise the value of this key is ``None``. If present, you may be able to recover (an equivalent of) the original image -- i.e. with transparency -- by creating :ref:`Pixmap` objects from the "image", respectively "mask" values and overlay them. This is not guaranteed to always work because mask images come in multiple formats, of which not all qualify for the conditions under which overlaying Pixmaps are supported. Here is a code snippet:
+
+   >>> base = pymupdf.Pixmap(block["image"])
+   >>> mask = pymupdf.Pixmap(block["mask"])
+   >>> result = pymupdf.Pixmap(base, mask)
 
 
 **Text block:**
@@ -263,7 +268,7 @@ dir             writing direction, :data:`point_like`
 spans           *list* of span dictionaries
 =============== =====================================================
 
-The value of key *"dir"* is the **unit vector** `dir = (cosine, sine)` of the angle, which the text has relative to the x-axis. See the following picture: The word in each quadrant (counter-clockwise from top-right to bottom-right) is rotated by 30, 120, 210 and 300 degrees respectively.
+The value of key *"dir"* is the **unit vector** `dir = (cosine, -sine)` of the angle, which the text has relative to the x-axis [#f2]_. See the following picture: The word in each quadrant (counter-clockwise from top-right to bottom-right) is rotated by 30, 120, 210 and 300 degrees respectively.
 
 .. image:: images/img-line-dir.*
    :scale: 100
@@ -286,14 +291,22 @@ ascender        ascender of the font *(float)*
 descender       descender of the font *(float)*
 size            font size *(float)*
 flags           font characteristics *(int)*
-color           text color in sRGB format *(int)*
+char_flags      char characteristics *(int)*
+color           text color in sRGB format 0xRRGGBB *(int)*.
+alpha           text opacity 0..255 *(int)*.
 text            (only for :meth:`extractDICT`) text *(str)*
 chars           (only for :meth:`extractRAWDICT`) *list* of character dictionaries
 =============== =====================================================================
 
+|history_begin|
+
+*(New in version 1.25.3.0):* Added *"alpha"* item.
+
 *(New in version 1.16.0):* *"color"* is the text color encoded in sRGB (int) format, e.g. 0xFF0000 for red. There are functions for converting this integer back to formats (r, g, b) (PDF with float values from 0 to 1) :meth:`sRGB_to_pdf`, or (R, G, B), :meth:`sRGB_to_rgb` (with integer values from 0 to 255).
 
 *(New in v1.18.5):* *"ascender"* and *"descender"* are font properties, provided relative to :data:`fontsize` 1. Note that descender is a negative value. The following picture shows the relationship to other values and properties.
+
+|history_end|
 
 .. image:: images/img-asc-desc.*
    :scale: 60
@@ -302,15 +315,15 @@ These numbers may be used to compute the minimum height of a character (or span)
 
 >>> a = span["ascender"]
 >>> d = span["descender"]
->>> r = fitz.Rect(span["bbox"])
->>> o = fitz.Point(span["origin"])  # its y-value is the baseline
+>>> r = pymupdf.Rect(span["bbox"])
+>>> o = pymupdf.Point(span["origin"])  # its y-value is the baseline
 >>> r.y1 = o.y - span["size"] * d / (a - d)
 >>> r.y0 = r.y1 - span["size"]
 >>> # r now is a rectangle of height 'fontsize'
 
 .. caution:: The above calculation may deliver a **larger** height! This may e.g. happen for OCRed documents, where the risk of all sorts of text artifacts is high. MuPDF tries to come up with a reasonable bbox height, independently from the :data:`fontsize` found in the PDF. So please ensure that the height of `span["bbox"]` is **larger** than `span["size"]`.
 
-.. note:: You may request PyMuPDF to do all of the above automatically by executing `fitz.TOOLS.set_small_glyph_heights(True)`. This sets a global parameter so that all subsequent text searches and text extractions are based on reduced glyph heights, where meaningful.
+.. note:: You may request PyMuPDF to do all of the above automatically by executing `pymupdf.TOOLS.set_small_glyph_heights(True)`. This sets a global parameter so that all subsequent text searches and text extractions are based on reduced glyph heights, where meaningful.
 
 The following shows the original span rectangle in red and the rectangle with re-computed height in blue.
 
@@ -320,18 +333,34 @@ The following shows the original span rectangle in red and the rectangle with re
 
 *"flags"* is an integer, which represents font properties except for the first bit 0. They are to be interpreted like this:
 
-* bit 0: superscripted (2\ :sup:`0`) -- not a font property, detected by MuPDF code.
-* bit 1: italic (2\ :sup:`1`)
-* bit 2: serifed (2\ :sup:`2`)
-* bit 3: monospaced (2\ :sup:`3`)
-* bit 4: bold (2\ :sup:`4`)
+* bit 0: superscripted (:data:`TEXT_FONT_SUPERSCRIPT`) -- not a font property, detected by MuPDF code.
+* bit 1: italic (:data:`TEXT_FONT_ITALIC`)
+* bit 2: serifed (:data:`TEXT_FONT_SERIFED`)
+* bit 3: monospaced (:data:`TEXT_FONT_MONOSPACED`)
+* bit 4: bold (:data:`TEXT_FONT_BOLD`)
 
 Test these characteristics like so:
 
->>> if flags & 2**1: print("italic")
->>> # etc.
+>>> if flags & pymupdf.TEXT_FONT_BOLD & pymupdf.TEXT_FONT_ITALIC:
+        print(f"{span['text']=} is bold and italic")
+
 
 Bits 1 thru 4 are font properties, i.e. encoded in the font program. Please note, that this information is not necessarily correct or complete: fonts quite often contain wrong data here.
+
+*"char_flags"* is an integer, which represents extra character properties:
+
+* bit 0: strikeout.
+* bit 1: underline.
+* bit 2: synthetic (always 0, see char dictionary).
+* bit 3: filled.
+* bit 4: stroked.
+* bit 5: clipped.
+
+For example if not filled and not stroked (`if not (char_flags & 2**3 & 2**4):
+...`) then the text will be invisible.
+
+(`char_flags` is new in v1.25.2.)
+
 
 Character Dictionary for :meth:`extractRAWDICT`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -341,8 +370,11 @@ Character Dictionary for :meth:`extractRAWDICT`
 =============== ===========================================================
 origin          character's left baseline point, :data:`point_like`
 bbox            character rectangle, :data:`rect_like`
+synthetic       bool.
 c               the character (unicode)
 =============== ===========================================================
+
+(`synthetic` is new in v1.25.3.)
 
 This image shows the relationship between a character's bbox and its quad: |textpagechar|
 
@@ -350,9 +382,10 @@ This image shows the relationship between a character's bbox and its quad: |text
    :align: top
    :scale: 66
 
-
 .. rubric:: Footnotes
 
-.. [#f1] Image specifications for a PDF page are done in a page's (sub-) :data:`dictionary`, called *"/Resources"*. Resource dictionaries can be **inherited** from the page's parent object (usually the :data:`catalog`). The PDF creator may e.g. define one */Resources* on file level, naming all images and all fonts ever used by any page. In these cases, :meth:`Page.get_images` and :meth:`Page.get_fonts` will return the same lists for all pages.
+.. [#f1] Image specifications for a PDF page are done in a page's (sub-) :data:`dictionary`, called `/Resources`. Resource dictionaries can be **inherited** from any of the page's parent objects (usually the :data:`catalog` -- the top-level parent). The PDF creator may e.g. define one `/Resources` on file level, naming all images and / or all fonts ever used by any page. In these cases, :meth:`Page.get_images` and :meth:`Page.get_fonts` will consequently return the same lists for all pages. If desired, this situation can be reverted using :meth:`Page.clean_contents`. After execution, the page's object definition will show fonts and images that are actually used.
+
+.. [#f2] The coordinate systems of MuPDF and PDF are different in that MuPDF uses the page's top-left point as `(0, 0)`. In PDF, this is the bottom-left point. Therefore, the positive direction for MuPDF's y-axis is **from top to bottom**. This causes the sign change for the sine value here: a **negative** value indicates anti-clockwise rotation of the text.
 
 .. include:: footer.rst

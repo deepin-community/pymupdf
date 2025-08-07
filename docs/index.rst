@@ -2,21 +2,31 @@
 
 .. This is the TOC in the sidebar!
 
+.. raw:: html
 
-Welcome to :title:`PyMuPDF`
+   <style>
+
+      .toc-drawer {
+         display: none;
+      }
+
+      .main .content {
+         width:  100% !important;
+      }
+
+   </style>
+
+Welcome to |PyMuPDF|
 ================================
 
-..
-   .. image:: images/pymupdf-logo.png
-      :align: left
-      :scale: 10%
+|PyMuPDF| is a high-performance **Python** library for data extraction, analysis, conversion & manipulation of **PDF** (and other) documents.
+
+|PyMuPDF| is hosted on `GitHub <https://github.com/pymupdf/PyMuPDF>`_ and registered on `PyPI <https://pypi.org/project/PyMuPDF/>`_.
 
 
-:title:`PyMuPDF` is a high-performance Python library for data extraction, analysis, conversion & manipulation of PDF (and other) documents.
+----
 
-:title:`PyMuPDF` is hosted on `GitHub <https://github.com/pymupdf/PyMuPDF>`_ and registered on `PyPI <https://pypi.org/project/PyMuPDF/>`_.
-
-|
+This documentation covers all versions up to |version|.
 
 ----
 
@@ -25,6 +35,8 @@ Welcome to :title:`PyMuPDF`
    :maxdepth: 1
 
    about.rst
+   pymupdf4llm/index.rst
+   pymupdf-pro.rst
 
 
 .. toctree::
@@ -34,6 +46,8 @@ Welcome to :title:`PyMuPDF`
    installation.rst
    the-basics.rst
    tutorial.rst
+   rag.rst
+   resources.rst
 
 
 
@@ -68,16 +82,8 @@ Welcome to :title:`PyMuPDF`
    changes.rst
    znames.rst
 
-
-
-Find out about PyMuPDF Utilities
--------------------------------------------------
-
-The :title:`GitHub` repository `PyMuPDF-Utilities <https://github.com/pymupdf/PyMuPDF-Utilities>`_ contains a full range of examples, demonstrations and use cases.
-
-
-
-
+|
+----
 
 
 

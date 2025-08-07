@@ -1,4 +1,4 @@
-import fitz
+import pymupdf
 
 import os
 import subprocess
@@ -9,12 +9,8 @@ def test_flake8():
     '''
     Check rebased Python code with flake8.
     '''
-    if not hasattr(fitz, 'mupdf'):
+    if not hasattr(pymupdf, 'mupdf'):
         print(f'Not running flake8 with classic implementation.')
-        return
-    if sys.prefix == sys.base_prefix:
-        # We install flake8, which we only want to do if we are in a venv.
-        print(f'Not running flake8 because we are not in a venv.')
         return
     ignores = (
             'E123', # closing bracket does not match indentation of opening bracket's line
@@ -47,12 +43,12 @@ def test_flake8():
             'W293', # blank line contains whitespace
             'W503', # line break before binary operator
             'W504', # line break after binary operator
+            'E731', # do not assign a lambda expression, use a def
             )
     ignores = ','.join(ignores)
     root = os.path.abspath(f'{__file__}/../..')
     def run(command):
         print(f'test_flake8(): Running: {command}')
         subprocess.run(command, shell=1, check=1)
-    run(f'pip install flake8')
-    run(f'flake8 --ignore={ignores} --statistics {root}/src/__init__.py {root}/src/utils.py {root}/fitz/table.py')
+    run(f'flake8 --ignore={ignores} --statistics {root}/src/__init__.py {root}/src/utils.py {root}/src/table.py')
     print(f'test_flake8(): flake8 succeeded.')
