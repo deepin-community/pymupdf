@@ -2,6 +2,7 @@
 
 Welcome to the PyMuPDF documentation. This documentation relies on [Sphinx](https://www.sphinx-doc.org/en/master/) to publish HTML docs from markdown files written with [restructured text](https://en.wikipedia.org/wiki/ReStructuredText) (RST).
 
+
 ## Sphinx version
 
 This README assumes you have [Sphinx v5.0.2 installed](https://www.sphinx-doc.org/en/master/usage/installation.html) on your system.
@@ -10,7 +11,6 @@ This README assumes you have [Sphinx v5.0.2 installed](https://www.sphinx-doc.or
 ## Updating the documentation
 
 Within `docs` update the associated restructured text (`.rst`) files. These files represent the corresponding document pages. 
-
 
 
 ## Building HTML documentation
@@ -32,6 +32,15 @@ This then creates the HTML documentation within `build/html`.
 
 > Use: `sphinx-build -a -b html . build/html` to build all, including the assets in `_static` (important if you have updated CSS).
 
+
+### Using Sphinx Autobuild
+
+A better way of building the documentation if you are actively working on updates is to run:
+
+`sphinx-autobuild . _build/html`
+
+This will serve the docs on a localhost and auto-update the pages live as you make edits.
+
 ### Building the Japanese documentation
 
 - From the "docs" location run:
@@ -52,17 +61,13 @@ This will update the corresponding `po` files for further edits. Then check thes
 
 ## Building PDF documentation
 
-
 - First ensure you have [rst2pdf](https://pypi.org/project/rst2pdf/) installed:
-	
 
 `python -m pip install rst2pdf`
 
-
 - Then run:
 
-
-`sphinx-build -b pdf source build/pdf`
+`sphinx-build -b pdf . build/pdf`
 
 This will then generate a single PDF for all of the documentation within `build/pdf`.
 

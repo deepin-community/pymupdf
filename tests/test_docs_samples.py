@@ -21,6 +21,7 @@ for p in glob.glob(f'{root}/docs/samples/*.py'):
             ):
         print(f'Not testing: {p}')
     else:
+        p = os.path.relpath(p, root)
         samples.append(p)
 
 def _test_all():
@@ -29,7 +30,7 @@ def _test_all():
     import sys
     e = 0
     for sample in samples:
-        print( f'Running: {sample}')
+        print( f'Running: {sample}', flush=1)
         try:
             if 0:
                 # Curiously this fails in an odd way when testing compound
@@ -54,4 +55,5 @@ def _test_all():
 #
 @pytest.mark.parametrize('sample', samples)
 def test_docs_samples(sample):
+    sample = f'{root}/{sample}'
     runpy.run_path(sample)
