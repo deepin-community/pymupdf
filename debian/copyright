@@ -3,33 +3,37 @@ Upstream-Name: PyMuPDF
 Upstream-Contact: Artifex <support@artifex.com>
 Source: https://github.com/pymupdf/PyMuPDF/
 Files-Excluded: docs/_static
-                fitz/_config.h
 
 Files: *
 Copyright: 2012-2018 Ruikai Liu <lrk700@gmail.com>
            2015-2021 Jorj X. McKie <jorj.x.mckie@outlook.de>
 License: AGPL-3
 
+Files: src_classic/*
+Copyright: 2020-2022, Harald Lieder, mailto:harald.lieder@outlook.com
+License: AGPL-3
+
+Files: src_classic/_config.h
+Copyright: (C) 2004-2021 Artifex Software, Inc.
+License: AGPL-3
+
 Files: docs/extensions/fulltoc.py
 Copyright: 2012 New Dream Network, LLC (DreamHost)
 License: Apache-2
 
-Files: fitz/*
-Copyright: 2020-2022, Harald Lieder, mailto:harald.lieder@outlook.com
-License: AGPL-3
-
-Files: fitz/utils.py
+Files: src/utils.py
 Copyright: 2020-2021, Harald Lieder, mailto:harald.lieder@outlook.com
            (c) 2001-2017 by Total Control Software
 License: AGPL-3 and wxWindows
 
-Files: docs/multiprocess-gui.py
+Files: docs/samples/multiprocess-gui.py
 Copyright: 2019 yinkaisheng@live.com
 License: AGPL-3
 
 Files: debian/*
 Copyright: 2019 Johannes 'josch' Schauer <josch@debian.org>
            2020-2021 Bastian Germann
+           2025 Daniel Echeverri <epsilon@debian.org>
 License: GPL-3+
 
 License: GPL-3+

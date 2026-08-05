@@ -61,12 +61,15 @@ Yet others are handy, general-purpose utilities.
 :meth:`recover_line_quad`            compute the quad of a subset of line spans
 :meth:`recover_quad`                 compute the quad of a span ("dict", "rawdict")
 :meth:`recover_span_quad`            compute the quad of a subset of span characters
+:meth:`set_messages`                 set destination of |PyMuPDF| messages.
 :meth:`sRGB_to_pdf`                  return PDF RGB color tuple from an sRGB integer
 :meth:`sRGB_to_rgb`                  return (R, G, B) color tuple from an sRGB integer
 :meth:`unicode_to_glyph_name`        return glyph name from a unicode
 :meth:`get_tessdata`                 locates the language support of the Tesseract-OCR installation
+:meth:`colors_pdf_dict`              return dict of color names.
+:meth:`colors_wx_list`               return list of color names.
 :attr:`fitz_fontdescriptors`         dictionary of available supplement fonts
-:attr:`TESSDATA_PREFIX`              a copy of `os.environ["TESSDATA_PREFIX"]`
+:attr:`PYMUPDF_MESSAGE`              destination of |PyMuPDF| messages.
 :attr:`pdfcolor`                     dictionary of almost 500 RGB colors in PDF format.
 ==================================== ==============================================================
 
@@ -81,7 +84,7 @@ Yet others are handy, general-purpose utilities.
       :arg str s: any format name from above in upper or lower case, like *"A4"* or *"letter-l"*.
 
       :rtype: tuple
-      :returns: *(width, height)* of the paper format. For an unknown format *(-1, -1)* is returned. Examples: *fitz.paper_size("A4")* returns *(595, 842)* and *fitz.paper_size("letter-l")* delivers *(792, 612)*.
+      :returns: *(width, height)* of the paper format. For an unknown format *(-1, -1)* is returned. Examples: *pymupdf.paper_size("A4")* returns *(595, 842)* and *pymupdf.paper_size("letter-l")* delivers *(792, 612)*.
 
 -----
 
@@ -92,12 +95,47 @@ Yet others are handy, general-purpose utilities.
       :arg str s: any format name supported by :meth:`paper_size`.
 
       :rtype: :ref:`Rect`
-      :returns: *fitz.Rect(0, 0, width, height)* with *width, height=fitz.paper_size(s)*.
+      :returns: *pymupdf.Rect(0, 0, width, height)* with *width, height=pymupdf.paper_size(s)*.
 
-      >>> import fitz
-      >>> fitz.paper_rect("letter-l")
-      fitz.Rect(0.0, 0.0, 792.0, 612.0)
+      >>> import pymupdf
+      >>> pymupdf.paper_rect("letter-l")
+      pymupdf.Rect(0.0, 0.0, 792.0, 612.0)
       >>>
+
+-----
+
+   .. method:: set_messages(*, text=None, fd=None, stream=None, path=None, path_append=None, pylogging=None, pylogging_logger=None, pylogging_level=None, pylogging_name=None, )
+
+      Sets destination of |PyMuPDF| messages to a file descriptor,
+      a file, an existing stream or `Python's logging system
+      <https://docs.python.org/3/library/logging.html>`_.
+
+      Usually one would only set one arg, or one or more `pylogging*` args.
+
+      :arg str text:
+          A text specification of destination; for details see description of
+          environmental variable `PYMUPDF_MESSAGE`.
+      :arg int fd:
+          Write to file descriptor.
+      :arg stream:
+          Write to existing stream, which must have methods `.write(text)` and
+          `.flush()`.
+      :arg str path:
+          Write to a file.
+      :arg str path_append:
+          Append to a file.
+      :arg pylogging:
+          Write to Python's `logging` system.
+      :arg logging.Logger pylogging_logger:
+          Write to Python's `logging` system using specified Logger.
+      :arg int pylogging_level:
+          Write to Python's `logging` system using specified level.
+      :arg str pylogging_name:
+          Write to Python's `logging` system using specified logger name.
+          Only used if `pylogging_logger` is None. Default is `pymupdf`.
+
+      If any `pylogging*` arg is not None, we write to `Python's logging system
+      <https://docs.python.org/3/library/logging.html>`_.
 
 -----
 
@@ -149,7 +187,7 @@ Yet others are handy, general-purpose utilities.
       :arg int ch: the unicode given by e.g. `ord("ß")`. The function is based on the `Adobe Glyph List <https://github.com/adobe-type-tools/agl-aglfn/blob/master/glyphlist.txt>`_.
 
       :rtype: str
-      :returns: the glyph name. E.g. `fitz.unicode_to_glyph_name(ord("Ä"))` returns `'Adieresis'`.
+      :returns: the glyph name. E.g. `pymupdf.unicode_to_glyph_name(ord("Ä"))` returns `'Adieresis'`.
 
       .. note:: A similar functionality is provided by package `fontTools <https://pypi.org/project/fonttools/>`_: in its *agl* sub-package.
 
@@ -204,7 +242,7 @@ Yet others are handy, general-purpose utilities.
 
       For example to replace the "sans-serif" HTML standard (i.e. Helvetica) with the above "notos", execute the following. Whenever "sans-serif" is used (whether explicitly or implicitly), the Noto Sans fonts will be selected.
 
-      `CSS = fitz.css_for_pymupdf_font("notos", name="sans-serif", archive=...)`
+      `CSS = pymupdf.css_for_pymupdf_font("notos", name="sans-serif", archive=...)`
 
       Expects and returns the CSS source, with the new CSS definitions appended.
 
@@ -214,13 +252,13 @@ Yet others are handy, general-purpose utilities.
       :arg str name: the name under which the "fontcode" fonts should be found. If omitted, "fontcode" will be used.
 
       :rtype: str
-      :returns: Modified CSS, with appended `@font-face` statements for each font variant of fontcode. Fontbuffers associated with "fontcode" will have been added to 'archive'. The function will automatically find up to 4 font variants. All pymupdf-fonts (that are no special purpose like math or music, etc.) have regular, bold, italic and bold-italic variants. To see currently available font codes check `fitz.fitz_fontdescriptors.keys()`. This will show something like `dict_keys(['cascadia', 'cascadiai', 'cascadiab', 'cascadiabi', 'figbo', 'figo', 'figbi', 'figit', 'fimbo', 'fimo', 'spacembo', 'spacembi', 'spacemit', 'spacemo', 'math', 'music', 'symbol1', 'symbol2', 'notosbo', 'notosbi', 'notosit', 'notos', 'ubuntu', 'ubuntubo', 'ubuntubi', 'ubuntuit', 'ubuntm', 'ubuntmbo', 'ubuntmbi', 'ubuntmit'])`.
+      :returns: Modified CSS, with appended `@font-face` statements for each font variant of fontcode. Fontbuffers associated with "fontcode" will have been added to 'archive'. The function will automatically find up to 4 font variants. All pymupdf-fonts (that are no special purpose like math or music, etc.) have regular, bold, italic and bold-italic variants. To see currently available font codes check `pymupdf.fitz_fontdescriptors.keys()`. This will show something like `dict_keys(['cascadia', 'cascadiai', 'cascadiab', 'cascadiabi', 'figbo', 'figo', 'figbi', 'figit', 'fimbo', 'fimo', 'spacembo', 'spacembi', 'spacemit', 'spacemo', 'math', 'music', 'symbol1', 'symbol2', 'notosbo', 'notosbi', 'notosit', 'notos', 'ubuntu', 'ubuntubo', 'ubuntubi', 'ubuntuit', 'ubuntm', 'ubuntmbo', 'ubuntmbi', 'ubuntmit'])`.
 
       Here is a complete snippet for using the "Noto Sans" font instead of "Helvetica"::
 
-         arch = fitz.Archive()
-         CSS = fitz.css_for_pymupdf_font("notos", name="sans-serif", archive=arch)
-         story = fitz.Story(user_css=CSS, archive=arch)
+         arch = pymupdf.Archive()
+         CSS = pymupdf.css_for_pymupdf_font("notos", name="sans-serif", archive=arch)
+         story = pymupdf.Story(user_css=CSS, archive=arch)
 
 
 -----
@@ -236,7 +274,7 @@ Yet others are handy, general-purpose utilities.
       :arg rect_like rect: the rectangle to split.
       :arg int cols: the desired number of columns.
       :arg int rows: the desired number of rows.
-      :returns: a list of :ref:`Rect` objects of equal size, whose union equals *rect*. Here is the layout of a 3x4 table created by `cell = fitz.make_table(rect, cols=4, rows=3)`:
+      :returns: a list of :ref:`Rect` objects of equal size, whose union equals *rect*. Here is the layout of a 3x4 table created by `cell = pymupdf.make_table(rect, cols=4, rows=3)`:
 
       .. image:: images/img-make-table.*
          :scale: 60
@@ -256,11 +294,11 @@ Yet others are handy, general-purpose utilities.
       :rtype: :ref:`Matrix`
       :returns: a matrix which combines a rotation and a translation::
 
-            >>> p1 = fitz.Point(1, 1)
-            >>> p2 = fitz.Point(4, 5)
+            >>> p1 = pymupdf.Point(1, 1)
+            >>> p2 = pymupdf.Point(4, 5)
             >>> abs(p2 - p1)  # distance of points
             5.0
-            >>> m = fitz.planish_line(p1, p2)
+            >>> m = pymupdf.planish_line(p1, p2)
             >>> p1 * m
             Point(0.0, 0.0)
             >>> p2 * m
@@ -288,11 +326,11 @@ Yet others are handy, general-purpose utilities.
 
       A dictionary of usable fonts from repository `pymupdf-fonts <https://pypi.org/project/pymupdf-fonts/>`_. Items are keyed by their reserved fontname and provide information like this::
 
-         In [2]: fitz.fitz_fontdescriptors.keys()
+         In [2]: pymupdf.fitz_fontdescriptors.keys()
          Out[2]: dict_keys(['figbo', 'figo', 'figbi', 'figit', 'fimbo', 'fimo',
          'spacembo', 'spacembi', 'spacemit', 'spacemo', 'math', 'music', 'symbol1',
          'symbol2'])
-         In [3]: fitz.fitz_fontdescriptors["fimo"]
+         In [3]: pymupdf.fitz_fontdescriptors["fimo"]
          Out[3]:
          {'name': 'Fira Mono Regular',
          'size': 125712,
@@ -304,19 +342,43 @@ Yet others are handy, general-purpose utilities.
 
       If `pymupdf-fonts` is not installed, the dictionary is empty.
 
-      The dictionary keys can be used to define a :ref:`Font` via e.g. `font = fitz.Font("fimo")` -- just like you can do it with the builtin fonts "Helvetica" and friends.
+      The dictionary keys can be used to define a :ref:`Font` via e.g. `font = pymupdf.Font("fimo")` -- just like you can do it with the builtin fonts "Helvetica" and friends.
 
 -----
 
-   .. attribute:: TESSDATA_PREFIX
+   .. attribute:: PYMUPDF_MESSAGE
+   
+      If in `os.environ` when |PyMuPDF| is imported, sets destination of
+      |PyMuPDF| messages. Otherwise messages are sent to `sys.stdout`.
+      
+      *
+        If the value starts with `fd:`, the remaining text should be an integer
+        file descriptor to which messages are written.
+    
+        * For example `PYMUPDF_MESSAGE=fd:2` will send messages to stderr.
+      *
+        If the value starts with `path:`, the remaining text is the path of a
+        file to which messages are written. If the file already exists, it is
+        truncated.
+      *
+        If the value starts with `path+:`, the remaining text is the path of
+        file to which messages are written. If the file already exists, we
+        append output.
 
-      * New in v1.19.4
+      *
+        If the value starts with `logging:`, messages are written to `Python's
+        logging system <https://docs.python.org/3/library/logging.html>`_. The
+        remaining text can contain comma-separated name=value items:
+    
+        * `level=<int>` sets the logging level.
+        * `name=<str>` sets the logger name (default is `pymupdf`).
+    
+        Other items are ignored.
+    
+      * Other prefixes will cause an error.
+      
+      Also see `set_messages()`.
 
-      Copy of `os.environ["TESSDATA_PREFIX"]` for convenient checking whether there is integrated Tesseract OCR support.
-
-      If this attribute is `None`, Tesseract-OCR is either not installed, or the environment variable is not set to point to Tesseract's language support folder.
-
-      .. note:: This variable is now checked before OCR functions are tried. This prevents verbose messages from MuPDF.
 
 -----
 
@@ -324,13 +386,13 @@ Yet others are handy, general-purpose utilities.
 
       * New in v1.19.6
 
-      Contains about 500 RGB colors in PDF format with the color name as key. To see what is there, you can obviously look at `fitz.pdfcolor.keys()`.
+      Contains about 500 RGB colors in PDF format with the color name as key. To see what is there, you can obviously look at `pymupdf.pdfcolor.keys()`.
 
       Examples:
 
-        * `fitz.pdfcolor["red"] = (1.0, 0.0, 0.0)`
-        * `fitz.pdfcolor["skyblue"] = (0.5294117647058824, 0.807843137254902, 0.9215686274509803)`
-        * `fitz.pdfcolor["wheat"] = (0.9607843137254902, 0.8705882352941177, 0.7019607843137254)`
+        * `pymupdf.pdfcolor["red"] = (1.0, 0.0, 0.0)`
+        * `pymupdf.pdfcolor["skyblue"] = (0.5294117647058824, 0.807843137254902, 0.9215686274509803)`
+        * `pymupdf.pdfcolor["wheat"] = (0.9607843137254902, 0.8705882352941177, 0.7019607843137254)`
 
 -----
 
@@ -360,7 +422,7 @@ Yet others are handy, general-purpose utilities.
 
       .. note:: The :ref:`Font` class offers a similar method, :meth:`Font.text_length`, which supports Base-14 fonts and any font with a character map (CMap, Type 0 fonts).
 
-      .. warning:: If you use this function to determine the required rectangle width for the (:ref:`Page` or :ref:`Shape`) *insert_textbox* methods, be aware that they calculate on a **by-character level**. Because of rounding effects, this will mostly lead to a slightly larger number: *sum([fitz.get_text_length(c) for c in text]) > fitz.get_text_length(text)*. So either (1) do the same, or (2) use something like *fitz.get_text_length(text + "'")* for your calculation.
+      .. warning:: If you use this function to determine the required rectangle width for the (:ref:`Page` or :ref:`Shape`) *insert_textbox* methods, be aware that they calculate on a **by-character level**. Because of rounding effects, this will mostly lead to a slightly larger number: *sum([pymupdf.get_text_length(c) for c in text]) > pymupdf.get_text_length(text)*. So either (1) do the same, or (2) use something like *pymupdf.get_text_length(text + "'")* for your calculation.
 
 -----
 
@@ -389,7 +451,7 @@ Yet others are handy, general-purpose utilities.
       :returns:
          No exception is ever raised. In case of an error, `None` is returned. Otherwise, there are the following items::
 
-            In [2]: fitz.image_profile(open("nur-ruhig.jpg", "rb").read())
+            In [2]: pymupdf.image_profile(open("nur-ruhig.jpg", "rb").read())
             Out[2]:
             {'width': 439,
             'height': 501,
@@ -418,7 +480,7 @@ Yet others are handy, general-purpose utilities.
          .. note::
 
             * For some "exotic" images (FAX encodings, RAW formats and the like), this method will not work. You can however still work with such images in PyMuPDF, e.g. by using :meth:`Document.extract_image` or create pixmaps via `Pixmap(doc, xref)`. These methods will automatically convert exotic images to the PNG format before returning results.
-            * You can also get the properties of images embedded in a PDF, via their :data:`xref`. In this case make sure to extract the raw stream: `fitz.image_profile(doc.xref_stream_raw(xref))`.
+            * You can also get the properties of images embedded in a PDF, via their :data:`xref`. In this case make sure to extract the raw stream: `pymupdf.image_profile(doc.xref_stream_raw(xref))`.
             * Images as returned by the image blocks of :meth:`Page.get_text` using "dict" or "rawdict" options are also supported.
 
 
@@ -545,7 +607,7 @@ Yet others are handy, general-purpose utilities.
 
       1. Information above tagged with "(1)" has the same meaning and value as explained in :ref:`TextPage`.
 
-         - Please note that the font `flags` value will never contain a *superscript* flag bit: the detection of superscripts is done within MuPDF :ref:`TextPage` code -- it is not a property of any font.
+         - Please note that the font ``flags`` value will never contain a *superscript* flag bit: the detection of superscripts is done within MuPDF :ref:`TextPage` code -- it is not a property of any font.
          - Also note, that the text *color* is encoded as the usual tuple of floats 0 <= f <= 1 -- not in sRGB format. Depending on `span["type"]`, interpret this as fill color or stroke color.
 
       2. There are 3 text span types:
@@ -597,15 +659,17 @@ Yet others are handy, general-purpose utilities.
 
    .. method:: Page.wrap_contents()
 
-      Put string pair "q" / "Q" before, resp. after a page's */Contents* object(s) to ensure that any "geometry" changes are **local** only.
+      Ensures that the page's so-called graphics state is balanced and new content can be inserted correctly.
+      
+      In versions 1.24.1+ of PyMuPDF the method was improved and is being executed automatically as required, so you should no longer need to concern yourself with it.
 
-      Use this method as an alternative, minimalist version of :meth:`Page.clean_contents`. Its advantage is a small footprint in terms of processing time and impact on the data size of incremental saves. Multiple executions of this method are no problem and have no functional impact: `b"q q contents Q Q"` is treated like `b"q contents Q"`.
+      We discourage using :meth:`Page.clean_contents` to achieve this.
 
 -----
 
    .. attribute:: Page.is_wrapped
 
-      Indicate whether :meth:`Page.wrap_contents` may be required for object insertions in standard PDF geometry. Note that this is a quick, basic check only: a value of *False* may still be a false alarm. But nevertheless executing :meth:`Page.wrap_contents` will have no negative side effects.
+      Indicate whether the page's so-called graphic state is balanced. If `False`, :meth:`Page.wrap_contents` should be executed if new content is inserted (only relevant in `overlay=True` mode). In newer versions (1.24.1+), this check and corresponding adjustments are automatically executed -- you therefore should not be concerned about this anymore.
 
       :rtype: bool
 
@@ -638,7 +702,7 @@ Yet others are handy, general-purpose utilities.
 
    .. method:: Page.get_contents()
 
-      PDF only: Retrieve a list of :data:`xref` of :data:`contents` objects of a page. May be empty or contain multiple integers. If the page is cleaned (:meth:`Page.clean_contents`), it will be one entry at most. The "source" of each `/Contents` object can be individually read by :meth:`Document.xref_stream` using an item of this list. Method :meth:`Page.read_contents` in contrast walks through this list and concatenates the corresponding sources into one `bytes` object.
+      PDF only: Retrieve a list of :data:`xref` of :data:`contents` objects of a page. May be empty or contain multiple integers. If the page is cleaned (:meth:`Page.clean_contents`), it will be no more than one entry. The "source" of each `/Contents` object can be individually read by :meth:`Document.xref_stream` using an item of this list. Method :meth:`Page.read_contents` in contrast walks through this list and concatenates the corresponding sources into one `bytes` object.
 
       :rtype: list[int]
 
@@ -661,6 +725,8 @@ Yet others are handy, general-purpose utilities.
       :arg bool sanitize: *(new in v1.17.6)* if true, synchronization between resources and their actual use in the contents object is snychronized. For example, if a font is not actually used for any text of the page, then it will be deleted from the `/Resources/Font` object.
 
       .. warning:: This is a complex function which may generate large amounts of new data and render old data unused. It is **not recommended** using it together with the **incremental save** option. Also note that the resulting singleton new */Contents* object is **uncompressed**. So you should save to a **new file** using options *"deflate=True, garbage=3"*.
+
+         Do not any longer use this method to ensure correct insertions on PDF pages. Since PyMuPDF version 1.24.2 this is taken care of automatically.
 
 -----
 
@@ -773,13 +839,22 @@ Yet others are handy, general-purpose utilities.
 
 -----
 
-   .. method:: get_tessdata()
+   .. method:: get_tessdata(tessdata=None)
+    
+    Detect Tesseract language support folder.
 
-      Return the name of Tesseract's language support folder. Use this function if the environment variable `TESSDATA_PREFIX` has not been set.
+    This function is used to enable OCR via Tesseract even if the language
+    support folder is not specified directly or in environment variable
+    TESSDATA_PREFIX.
 
-      :returns: `os.getenv("TESSDATA_PREFIX")` if not `None`. Otherwise, if Tesseract-OCR is installed, locate the name of `tessdata`. If no installation is found, return `False`.
+    * If <tessdata> is set we return it directly.
+    
+    * Otherwise we return `os.environ['TESSDATA_PREFIX']` if set.
+    
+    * Otherwise we search for a Tesseract installation and return its language
+      support folder.
 
-         The folder name can be used as parameter `tessdata` in methods :meth:`Page.get_textpage_ocr`, :meth:`Pixmap.pdfocr_save` and :meth:`Pixmap.pdfocr_tobytes`.
+    * Otherwise we raise an exception.
 
 -----
 
@@ -800,5 +875,18 @@ Yet others are handy, general-purpose utilities.
    .. method:: EMPTY_IRECT()
 
       Return the "standard" empty and invalid rectangle `Rect(2147483520.0, 2147483520.0, -2147483648.0, -2147483648.0)` resp. quad. Its top-left and bottom-right point values are reversed compared to the infinite rectangle. It will e.g. be used to indicate empty bboxes in `page.get_text("dict")` dictionaries. There are however infinitely many empty or invalid rectangles.
+
+-----
+
+   .. method:: colors_pdf_dict()
+   
+      Returns a dict mapping lower-case color name to `(red, green, blue)`
+      tuple, and `red`, `green`, `blue` are floats in range 0..1.
+
+   .. method:: colors_wx_list()
+   
+      Returns a list of `(colorname, red, green, blue)` tuples, where
+      `colorname` is upper case and `red`, `green`, `blue` are integers in
+      range 0..255.
 
 .. include:: footer.rst

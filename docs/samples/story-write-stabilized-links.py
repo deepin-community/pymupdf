@@ -1,22 +1,22 @@
 """
-Demo script for PyMuPDF's `fitz.Story.write_stabilized_with_links()`.
+Demo script for PyMuPDF's `pymupdf.Story.write_stabilized_with_links()`.
 
-`fitz.Story.write_stabilized_links()` is similar to
-`fitz.Story.write_stabilized()` except that it creates a PDF `fitz.Document`
+`pymupdf.Story.write_stabilized_links()` is similar to
+`pymupdf.Story.write_stabilized()` except that it creates a PDF `pymupdf.Document`
 that contains PDF links generated from all internal links in the original html.
 """
 
 import textwrap
 
-import fitz
+import pymupdf
 
 
 def rectfn(rect_num, filled):
     '''
     We return one rect per page.
     '''
-    rect = fitz.Rect(10, 20, 290, 380)
-    mediabox = fitz.Rect(0, 0, 300, 400)
+    rect = pymupdf.Rect(10, 20, 290, 380)
+    mediabox = pymupdf.Rect(0, 0, 300, 400)
     #print(f'rectfn(): rect_num={rect_num} filled={filled}')
     return mediabox, rect, None
 
@@ -61,6 +61,7 @@ def contentfn(positions):
             <h1>First section</h1>
             <p>Contents of first section.
             <ul>
+            <li>External <a href="https://artifex.com/">link to https://artifex.com/</a>.
             <li><a href="#idtest">Link to IDTEST</a>.
             <li><a href="#nametest">Link to NAMETEST</a>.
             </ul>
@@ -85,5 +86,5 @@ def contentfn(positions):
 
 
 out_path = __file__.replace('.py', '.pdf')
-document = fitz.Story.write_stabilized_with_links(contentfn, rectfn)
+document = pymupdf.Story.write_stabilized_with_links(contentfn, rectfn)
 document.save(out_path)

@@ -3,7 +3,7 @@
 ===============================
 Constants and Enumerations
 ===============================
-Constants and enumerations of :title:`MuPDF` as implemented by :title:`PyMuPDF`. Each of the following variables is accessible as *fitz.variable*.
+Constants and enumerations of :title:`MuPDF` as implemented by |PyMuPDF|. Each of the following values is accessible as `pymupdf.value`.
 
 
 Constants
@@ -13,69 +13,91 @@ Constants
 
     Predefined Python list of valid :ref:`Base-14-Fonts`.
 
-    :rtype: list
+    :type: list
 
 .. py:data:: csRGB
 
-    Predefined RGB colorspace *fitz.Colorspace(fitz.CS_RGB)*.
+    Predefined RGB colorspace *pymupdf.Colorspace(pymupdf.CS_RGB)*.
 
-    :rtype: :ref:`Colorspace`
+    :type: :ref:`Colorspace`
 
 .. py:data:: csGRAY
 
-    Predefined GRAY colorspace *fitz.Colorspace(fitz.CS_GRAY)*.
+    Predefined GRAY colorspace *pymupdf.Colorspace(pymupdf.CS_GRAY)*.
 
-    :rtype: :ref:`Colorspace`
+    :type: :ref:`Colorspace`
 
 .. py:data:: csCMYK
 
-    Predefined CMYK colorspace *fitz.Colorspace(fitz.CS_CMYK)*.
+    Predefined CMYK colorspace *pymupdf.Colorspace(pymupdf.CS_CMYK)*.
 
-    :rtype: :ref:`Colorspace`
+    :type: :ref:`Colorspace`
 
 .. py:data:: CS_RGB
 
     1 -- Type of :ref:`Colorspace` is RGBA
 
-    :rtype: int
+    :type: int
 
 .. py:data:: CS_GRAY
 
     2 -- Type of :ref:`Colorspace` is GRAY
 
-    :rtype: int
+    :type: int
 
 .. py:data:: CS_CMYK
 
     3 -- Type of :ref:`Colorspace` is CMYK
 
-    :rtype: int
+    :type: int
 
-.. py:data:: VersionBind
+.. py:data:: mupdf_version
 
-    'x.xx.x' -- version of PyMuPDF (these bindings)
+    'x.xx.x' -- MuPDF version that is being used by PyMuPDF.
 
-    :rtype: string
+    :type: string
 
-.. py:data:: VersionFitz
+.. py:data:: mupdf_version_tuple
 
-    'x.xxx' -- version of MuPDF
+    MuPDF version as a tuple of integers, `(major, minor, patch)`.
+    
+    :type: tuple
 
-    :rtype: string
+.. py:data:: pymupdf_version
 
-.. py:data:: VersionDate
+    'x.xx.x' -- PyMuPDF version.
+
+    :type: string
+
+.. py:data:: pymupdf_version_tuple
+
+    PyMuPDF version as a tuple of integers, `(major, minor, patch)`.
+    
+    :type: tuple
+
+.. py:data:: pymupdf_date
 
     ISO timestamp *YYYY-MM-DD HH:MM:SS* when these bindings were built.
 
-    :rtype: string
-
-.. Note:: The docstring of *fitz* contains information of the above which can be retrieved like so: *print(fitz.__doc__)*, and should look like: *PyMuPDF 1.10.0: Python bindings for the MuPDF 1.10 library, built on 2016-11-30 13:09:13*.
+    :type: string
 
 .. py:data:: version
 
-    (VersionBind, VersionFitz, timestamp) -- combined version information where *timestamp* is the generation point in time formatted as "YYYYMMDDhhmmss".
+    (pymupdf_version, mupdf_version, timestamp) -- combined version information where `timestamp` is the generation point in time formatted as "YYYYMMDDhhmmss".
 
-    :rtype: tuple
+    :type: tuple
+
+.. py:data:: VersionBind
+
+    Legacy equivalent to `mupdf_version`.
+
+.. py:data:: VersionFitz
+
+    Legacy equivalent to `pymupdf_version`.
+
+.. py:data:: VersionDate
+
+    Legacy equivalent to `mupdf_version`.
 
 
 .. _PermissionCodes:
@@ -165,11 +187,37 @@ Text Alignment
 
 .. _TextPreserve:
 
+.. _FontProperties:
+
+Font Properties
+-----------------------
+Please note that the following bits are derived from what a font has to say about its properties. It may not be (and quite often is not) correct.
+
+.. py:data:: TEXT_FONT_SUPERSCRIPT
+
+    1 -- the character or span is a superscript. This property is computed by MuPDF and not part of any font information.
+
+.. py:data:: TEXT_FONT_ITALIC
+
+    2 -- the font is italic.
+
+.. py:data:: TEXT_FONT_SERIFED
+
+    4 -- the font is serifed.
+
+.. py:data:: TEXT_FONT_MONOSPACED
+
+    8 -- the font is mono-spaced.
+
+.. py:data:: TEXT_FONT_BOLD
+
+    16 -- the font is bold.
+
 Text Extraction Flags
 ---------------------
-Option bits controlling the amount of data, that are parsed into a :ref:`TextPage` -- this class is mainly used only internally in PyMuPDF.
+Option bits controlling the amount of data, that are parsed into a :ref:`TextPage`.
 
-For the PyMuPDF programmer, some combination (using Python's `|` operator, or simply use `+`) of these values are aggregated in the `flags` integer, a parameter of all text search and text extraction methods. Depending on the individual method, different default combinations of the values are used. Please use a value that meets your situation. Especially make sure to switch off image extraction unless you really need them. The impact on performance and memory is significant!
+For the PyMuPDF programmer, some combination (using Python's `|` operator, or simply use `+`) of these values are aggregated in the ``flags`` integer, a parameter of all text search and text extraction methods. Depending on the individual method, different default combinations of the values are used. Please use a value that meets your situation. Especially make sure to switch off image extraction unless you really need them. The impact on performance and memory is significant!
 
 .. py:data:: TEXT_PRESERVE_LIGATURES
 
@@ -197,45 +245,72 @@ For the PyMuPDF programmer, some combination (using Python's `|` operator, or si
 
 .. py:data:: TEXT_MEDIABOX_CLIP
 
-    64 -- If set, characters entirely outside a page's **mediabox** will be ignored. This is default in PyMuPDF.
+    64 -- Characters entirely outside a page's **mediabox** or contained in other "clipped" areas will be ignored. This is default in PyMuPDF.
+
+.. py:data:: TEXT_CID_FOR_UNKNOWN_UNICODE
+
+    128 -- Use raw character codes instead of U+FFFD. This is the default for **text extraction** in PyMuPDF. If you **want to detect** when encoding information is missing or uncertain, toggle this flag and scan for the presence of U+FFFD (= `chr(0xfffd)`) code points in the resulting text.
+
+.. py:data:: TEXT_COLLECT_STRUCTURE
+
+    256 -- Not supported.
+
+.. py:data:: TEXT_ACCURATE_BBOXES
+
+    512 -- Ignore metric values of all fonts when computing character boundary boxes -- most prominently the `ascender <https://en.wikipedia.org/wiki/Ascender_(typography)>`_ and `descender <https://en.wikipedia.org/wiki/Descender>`_ values. Instead, follow the drawing commands of each character's glyph and compute its rectangle hull. This is the smallest rectangle wrapping all points used for drawing the visual appearance - see the :ref:`Shape` class for understanding the background. This will especially result in individual character heights. For instance a (white) space will have a **bbox of height 0** (because nothing is drawn) -- in contrast to the non-zero boundary box generated when using font metrics. This option may be useful to cope with getting meaningful boundary boxes even for fonts containing errors. Its use will slow down text extraction somewhat because of the incurred computational effort.
+    
+    Note that this has no effect by default - one must also disable the global
+    quad corrections setting with `pymupdf.TOOLS.unset_quad_corrections(True)`.
+
+.. py:data:: TEXT_COLLECT_VECTORS
+
+    1024 -- Not supported.
+
+.. py:data:: TEXT_IGNORE_ACTUALTEXT
+
+    2048 -- Ignore built-in differences between text appearing in e.g. PDF viewers versus text stored in the PDF. See :ref:`AdobeManual`, page 615 for background. If set, the **stored** ("replacement" text) is ignored in favor of the displayed text.
+
+.. py:data:: TEXT_STEXT_SEGMENT
+
+    4096 -- Attempt to segment page into different regions.
 
 The following constants represent the default combinations of the above for text extraction and searching:
 
 .. py:data:: TEXTFLAGS_TEXT
 
-    `TEXT_PRESERVE_LIGATURES | TEXT_PRESERVE_WHITESPACE | TEXT_MEDIABOX_CLIP`
+    `TEXT_PRESERVE_LIGATURES | TEXT_PRESERVE_WHITESPACE | TEXT_MEDIABOX_CLIP | TEXT_CID_FOR_UNKNOWN_UNICODE`
 
 .. py:data:: TEXTFLAGS_WORDS
 
-    `TEXT_PRESERVE_LIGATURES | TEXT_PRESERVE_WHITESPACE | TEXT_MEDIABOX_CLIP`
+    `TEXT_PRESERVE_LIGATURES | TEXT_PRESERVE_WHITESPACE | TEXT_MEDIABOX_CLIP | TEXT_CID_FOR_UNKNOWN_UNICODE`
 
 .. py:data:: TEXTFLAGS_BLOCKS
 
-    `TEXT_PRESERVE_LIGATURES | TEXT_PRESERVE_WHITESPACE | TEXT_MEDIABOX_CLIP`
+    `TEXT_PRESERVE_LIGATURES | TEXT_PRESERVE_WHITESPACE | TEXT_MEDIABOX_CLIP | TEXT_CID_FOR_UNKNOWN_UNICODE`
 
 .. py:data:: TEXTFLAGS_DICT
 
-    `TEXT_PRESERVE_LIGATURES | TEXT_PRESERVE_WHITESPACE | TEXT_MEDIABOX_CLIP | TEXT_PRESERVE_IMAGES`
+    `TEXT_PRESERVE_LIGATURES | TEXT_PRESERVE_WHITESPACE | TEXT_MEDIABOX_CLIP | TEXT_PRESERVE_IMAGES | TEXT_CID_FOR_UNKNOWN_UNICODE`
 
 .. py:data:: TEXTFLAGS_RAWDICT
 
-    `TEXT_PRESERVE_LIGATURES | TEXT_PRESERVE_WHITESPACE | TEXT_MEDIABOX_CLIP | TEXT_PRESERVE_IMAGES`
+    `TEXT_PRESERVE_LIGATURES | TEXT_PRESERVE_WHITESPACE | TEXT_MEDIABOX_CLIP | TEXT_PRESERVE_IMAGES | TEXT_CID_FOR_UNKNOWN_UNICODE`
 
 .. py:data:: TEXTFLAGS_HTML
 
-    `TEXT_PRESERVE_LIGATURES | TEXT_PRESERVE_WHITESPACE | TEXT_MEDIABOX_CLIP | TEXT_PRESERVE_IMAGES`
+    `TEXT_PRESERVE_LIGATURES | TEXT_PRESERVE_WHITESPACE | TEXT_MEDIABOX_CLIP | TEXT_PRESERVE_IMAGES | TEXT_CID_FOR_UNKNOWN_UNICODE`
 
 .. py:data:: TEXTFLAGS_XHTML
 
-    `TEXT_PRESERVE_LIGATURES | TEXT_PRESERVE_WHITESPACE | TEXT_MEDIABOX_CLIP | TEXT_PRESERVE_IMAGES`
+    `TEXT_PRESERVE_LIGATURES | TEXT_PRESERVE_WHITESPACE | TEXT_MEDIABOX_CLIP | TEXT_PRESERVE_IMAGES | TEXT_CID_FOR_UNKNOWN_UNICODE`
 
 .. py:data:: TEXTFLAGS_XML
 
-    `TEXT_PRESERVE_LIGATURES | TEXT_PRESERVE_WHITESPACE | TEXT_MEDIABOX_CLIP`
+    `TEXT_PRESERVE_LIGATURES | TEXT_PRESERVE_WHITESPACE | TEXT_MEDIABOX_CLIP | TEXT_CID_FOR_UNKNOWN_UNICODE`
 
 .. py:data:: TEXTFLAGS_SEARCH
 
-    `TEXT_PRESERVE_LIGATURES | TEXT_PRESERVE_WHITESPACE | TEXT_MEDIABOX_CLIP | TEXT_DEHYPHENATE`
+    `TEXT_PRESERVE_WHITESPACE | TEXT_MEDIABOX_CLIP | TEXT_DEHYPHENATE`
 
 
 .. _linkDest Kinds:
@@ -248,37 +323,43 @@ Possible values of :attr:`linkDest.kind` (link destination kind).
 
     0 -- No destination. Indicates a dummy link.
 
-    :rtype: int
+    :type: int
 
 .. py:data:: LINK_GOTO
 
     1 -- Points to a place in this document.
 
-    :rtype: int
+    :type: int
 
 .. py:data:: LINK_URI
 
     2 -- Points to a URI -- typically a resource specified with internet syntax.
+    
+    * PyMuPDF treats any external link that contains a colon and does not start
+      with `file:`, as `LINK_URI`.
 
-    :rtype: int
+    :type: int
 
 .. py:data:: LINK_LAUNCH
 
     3 -- Launch (open) another file (of any "executable" type).
+    
+    * |PyMuPDF| treats any external link that starts with `file:` or doesn't
+      contain a colon, as `LINK_LAUNCH`.
 
-    :rtype: int
+    :type: int
 
 .. py:data:: LINK_NAMED
 
     4 -- points to a named location.
 
-    :rtype: int
+    :type: int
 
 .. py:data:: LINK_GOTOR
 
     5 -- Points to a place in another PDF document.
 
-    :rtype: int
+    :type: int
 
 .. _linkDest Flags:
 
@@ -291,43 +372,43 @@ Link Destination Flags
 
     1  (bit 0) Top left x value is valid
 
-    :rtype: bool
+    :type: bool
 
 .. py:data:: LINK_FLAG_T_VALID
 
     2  (bit 1) Top left y value is valid
 
-    :rtype: bool
+    :type: bool
 
 .. py:data:: LINK_FLAG_R_VALID
 
     4  (bit 2) Bottom right x value is valid
 
-    :rtype: bool
+    :type: bool
 
 .. py:data:: LINK_FLAG_B_VALID
 
     8  (bit 3) Bottom right y value is valid
 
-    :rtype: bool
+    :type: bool
 
 .. py:data:: LINK_FLAG_FIT_H
 
     16 (bit 4) Horizontal fit
 
-    :rtype: bool
+    :type: bool
 
 .. py:data:: LINK_FLAG_FIT_V
 
     32 (bit 5) Vertical fit
 
-    :rtype: bool
+    :type: bool
 
 .. py:data:: LINK_FLAG_R_IS_ZOOM
 
     64 (bit 6) Bottom right x is a zoom figure
 
-    :rtype: bool
+    :type: bool
 
 
 Annotation Related Constants

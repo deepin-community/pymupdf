@@ -18,9 +18,9 @@ The document can be any :ref:`supported type<Supported_File_Types>`.
 
 The script works as a command line tool which expects the document filename supplied as a parameter. It generates one text file named "filename.txt" in the script directory. Text of pages is separated by a form feed character::
 
-    import sys, pathlib, fitz
+    import sys, pathlib, pymupdf
     fname = sys.argv[1]  # get document filename
-    with fitz.open(fname) as doc:  # open document
+    with pymupdf.open(fname) as doc:  # open document
         text = chr(12).join([page.get_text() for page in doc])
     # write as a binary file to support non-ASCII characters
     pathlib.Path(fname + ".txt").write_bytes(text.encode())
@@ -40,11 +40,17 @@ See the following two sections for examples and further explanations.
    triple: lookup;text;key-value
 
 
+How to Extract Text as Markdown
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This is especially useful for :title:`RAG/LLM` environments - please see :ref:`Outputting as Markdown <rag_outputting_as_md>`.
+
+
 .. _RecipesText_A1:
 
 How to Extract Key-Value Pairs from a Page
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-If the layout of a page is *"predictable"* in some sense, then there is a simple way to find the values for a given set of keywords fast and easily -- without using regular expressions. Please see `this <https://github.com/pymupdf/PyMuPDF-Utilities/tree/master/text-extraction/lookup-keywords.py>`_ example script.
+If the layout of a page is *"predictable"* in some sense, then there is a simple way to find the values for a given set of keywords fast and easily -- without using regular expressions. Please see `this example script <https://github.com/pymupdf/PyMuPDF-Utilities/tree/master/text-extraction/lookup-keywords.py>`_.
 
 "Predictable" in this context means:
 
@@ -85,7 +91,7 @@ One of the common issues with PDF text extraction is, that text may not appear i
 
 This is the responsibility of the PDF creator (software or a human). For example, page headers may have been inserted in a separate step -- after the document had been produced. In such a case, the header text will appear at the end of a page text extraction (although it will be correctly shown by PDF viewer software). For example, the following snippet will add some header and footer lines to an existing PDF::
 
-    doc = fitz.open("some.pdf")
+    doc = pymupdf.open("some.pdf")
     header = "Header"  # text in header
     footer = "Page %i of %i"  # text in footer
     for page in doc:
@@ -104,7 +110,7 @@ The text sequence extracted from a page modified in this way will look like this
 PyMuPDF has several means to re-establish some reading sequence or even to re-generate a layout close to the original:
 
 1. Use `sort` parameter of :meth:`Page.get_text`. It will sort the output from top-left to bottom-right (ignored for XHTML, HTML and XML output).
-2. Use the `fitz` module in CLI: `python -m fitz gettext ...`, which produces a text file where text has been re-arranged in layout-preserving mode. Many options are available to control the output.
+2. Use the `pymupdf` module in CLI: `python -m pymupdf gettext ...`, which produces a text file where text has been re-arranged in layout-preserving mode. Many options are available to control the output.
 
 You can also use the above mentioned `script <https://github.com/pymupdf/PyMuPDF/wiki/How-to-extract-text-from-a-rectangle>`_ with your modifications.
 
@@ -142,7 +148,7 @@ This method has advantages and drawbacks. Pros are:
 But you also have other options::
 
  import sys
- import fitz
+ import pymupdf
 
  def mark_word(page, text):
      """Underline each word that contains 'text'.
@@ -152,13 +158,13 @@ But you also have other options::
      for w in wlist:  # scan through all words on page
          if text in w[4]:  # w[4] is the word's string
              found += 1  # count
-             r = fitz.Rect(w[:4])  # make rect from word bbox
+             r = pymupdf.Rect(w[:4])  # make rect from word bbox
              page.add_underline_annot(r)  # underline
      return found
 
  fname = sys.argv[1]  # filename
  text = sys.argv[2]  # search string
- doc = fitz.open(fname)
+ doc = pymupdf.open(fname)
 
  print("underlining words containing '%s' in document '%s'" % (word, doc.name))
 
@@ -192,13 +198,16 @@ This script uses `Page.get_text("words")` to look for a string, handed in via cl
 
 How to Mark Searched Text
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. codespell:ignore-begin
+
 This script searches for text and marks it::
 
     # -*- coding: utf-8 -*-
-    import fitz
+    import pymupdf
 
     # the document to annotate
-    doc = fitz.open("tilted-text.pdf")
+    doc = pymupdf.open("tilted-text.pdf")
 
     # the text to be marked
     needle = "¡La práctica hace el campeón!"
@@ -215,6 +224,8 @@ This script searches for text and marks it::
 
     # save to a new PDF
     doc.save("a-squiggly.pdf")
+
+.. codespell:ignore-end
 
 The result looks like this:
 
@@ -234,12 +245,12 @@ But text **extraction** with the "dict" / "rawdict" options of :meth:`Page.get_t
 
 The "bboxes" returned by the method however are rectangles only -- not quads. So, to mark span text correctly, its quad must be recovered from the data contained in the line and span dictionary. Do this with the following utility function (new in v1.18.9)::
 
-    span_quad = fitz.recover_quad(line["dir"], span)
+    span_quad = pymupdf.recover_quad(line["dir"], span)
     annot = page.add_highlight_annot(span_quad)  # this will mark the complete span text
 
 If you want to **mark the complete line** or a subset of its spans in one go, use the following snippet (works for v1.18.10 or later)::
 
-    line_quad = fitz.recover_line_quad(line, spans=line["spans"][1:-1])
+    line_quad = pymupdf.recover_line_quad(line, spans=line["spans"][1:-1])
     page.add_highlight_annot(line_quad)
 
 .. image:: images/img-linequad.*
@@ -303,10 +314,10 @@ How to Write Text Lines
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 Output some text lines on a page::
 
-    import fitz
-    doc = fitz.open(...)  # new or existing PDF
+    import pymupdf
+    doc = pymupdf.open(...)  # new or existing PDF
     page = doc.new_page()  # new or existing page via doc[n]
-    p = fitz.Point(50, 72)  # start point of 1st line
+    p = pymupdf.Point(50, 72)  # start point of 1st line
 
     text = "Some text,\nspread across\nseveral lines."
     # the same result is achievable by
@@ -330,8 +341,8 @@ However, for built-in fonts there are ways to calculate the line width beforehan
 
 Here is another example. It inserts 4 text strings using the four different rotation options, and thereby explains, how the text insertion point must be chosen to achieve the desired result::
 
-    import fitz
-    doc = fitz.open()
+    import pymupdf
+    doc = pymupdf.open()
     page = doc.new_page()
     # the text strings, each having 3 lines
     text1 = "rotate=0\nLine 2\nLine 3"
@@ -340,10 +351,10 @@ Here is another example. It inserts 4 text strings using the four different rota
     text4 = "rotate=180\nLine 2\nLine 3"
     red = (1, 0, 0) # the color for the red dots
     # the insertion points, each with a 25 pix distance from the corners
-    p1 = fitz.Point(25, 25)
-    p2 = fitz.Point(page.rect.width - 25, 25)
-    p3 = fitz.Point(25, page.rect.height - 25)
-    p4 = fitz.Point(page.rect.width - 25, page.rect.height - 25)
+    p1 = pymupdf.Point(25, 25)
+    p2 = pymupdf.Point(page.rect.width - 25, 25)
+    p3 = pymupdf.Point(25, page.rect.height - 25)
+    p4 = pymupdf.Point(page.rect.width - 25, page.rect.height - 25)
     # create a Shape to draw on
     shape = page.new_shape()
 
@@ -379,90 +390,327 @@ How to Fill a Text Box
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 This script fills 4 different rectangles with text, each time choosing a different rotation value::
 
-    import fitz
-    doc = fitz.open(...)  # new or existing PDF
+    import pymupdf
+
+    doc = pymupdf.open()  # new or existing PDF
     page = doc.new_page()  # new page, or choose doc[n]
-    r1 = fitz.Rect(50,100,100,150)  # a 50x50 rectangle
-    disp = fitz.Rect(55, 0, 55, 0)  # add this to get more rects
-    r2 = r1 + disp  # 2nd rect
-    r3 = r1 + disp * 2  # 3rd rect
-    r4 = r1 + disp * 3  # 4th rect
-    t1 = "text with rotate = 0."  # the texts we will put in
+
+    # write in this overall area
+    rect = pymupdf.Rect(100, 100, 300, 150)
+
+    # partition the area in 4 equal sub-rectangles
+    CELLS = pymupdf.make_table(rect, cols=4, rows=1)
+
+    t1 = "text with rotate = 0."  # these texts we will written
     t2 = "text with rotate = 90."
-    t3 = "text with rotate = -90."
-    t4 = "text with rotate = 180."
-    red  = (1,0,0)  # some colors
-    gold = (1,1,0)
-    blue = (0,0,1)
-    """We use a Shape object (something like a canvas) to output the text and
+    t3 = "text with rotate = 180."
+    t4 = "text with rotate = 270."
+    text = [t1, t2, t3, t4]
+    red = pymupdf.pdfcolor["red"]  # some colors
+    gold = pymupdf.pdfcolor["gold"]
+    blue = pymupdf.pdfcolor["blue"]
+    """
+    We use a Shape object (something like a canvas) to output the text and
     the rectangles surrounding it for demonstration.
     """
     shape = page.new_shape()  # create Shape
-    shape.draw_rect(r1)  # draw rectangles
-    shape.draw_rect(r2)  # giving them
-    shape.draw_rect(r3)  # a yellow background
-    shape.draw_rect(r4)  # and a red border
-    shape.finish(width = 0.3, color = red, fill = gold)
-    # Now insert text in the rectangles. Font "Helvetica" will be used
-    # by default. A return code rc < 0 indicates insufficient space (not checked here).
-    rc = shape.insert_textbox(r1, t1, color = blue)
-    rc = shape.insert_textbox(r2, t2, color = blue, rotate = 90)
-    rc = shape.insert_textbox(r3, t3, color = blue, rotate = -90)
-    rc = shape.insert_textbox(r4, t4, color = blue, rotate = 180)
-    shape.commit()  # write all stuff to page /Contents
-    doc.save("...")
+    for i in range(len(CELLS[0])):
+        shape.draw_rect(CELLS[0][i])  # draw rectangle
+        shape.insert_textbox(
+            CELLS[0][i], text[i], fontname="hebo", color=blue, rotate=90 * i
+        )
 
-Several default values were used above: font "Helvetica", font size 11 and text alignment "left". The result will look like this:
+    shape.finish(width=0.3, color=red, fill=gold)
 
-.. image:: images/img-textbox.*
+    shape.commit()  # write all stuff to the page
+    doc.ez_save(__file__.replace(".py", ".pdf"))
+
+Some default values were used above: font size 11 and text alignment "left". The result will look like this:
+
+.. image:: images/img-rotate.*
    :scale: 50
 
 ------------------------------------------
 
 .. _RecipesText_I_c:
 
-How to Use Non-Standard Encoding
+How to Fill a Box with HTML Text
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Since v1.14, MuPDF allows Greek and Russian encoding variants for the :data:`Base14_Fonts`. In PyMuPDF this is supported via an additional *encoding* argument. Effectively, this is relevant for Helvetica, Times-Roman and Courier (and their bold / italic forms) and **characters outside the ASCII code range only**. ASCII characters remain Latin!
+Method :meth:`Page.insert_htmlbox` offers a **much more powerful** way to insert text in a rectangle.
 
-.. note:: Please keep in mind that the Base-14 fonts only support characters with `ord(c) < 256`. The `encoding` parameter does not change that. So only characters with `ord(c) > 128` are under the influence of `encoding`.
-    
-    To avoid these restrictions, we strongly recommend to use the file-based font variants, which are available via the :ref:`Font` class. These fonts do not require (and ignore) the encoding parameter. Your text can also be any mixture of standard Latin, Cyrillic, Greek and other characters. `fitz.Font("helv")` for example support 654 glyphs - not just 256. The only consideration is that your PDF file size will grow because now a font file will be embedded.
-    
-    Choosing any font from `pymupf-fonts <https://pypi.org/project/pymupdf-fonts/>`_ will provide you with the best of all worlds: nice and rich fonts that are also subsettable via :meth:`Document.subset_fonts()`. This limits your file sizes significantly. `fitz.Font("figo")` for example supports 4577 glyphs. But still, after using :meth:`Document.subset_fonts()`, the file size increase will probably be something like 10 or 12 KB -- and not 43 KB as with `fitz.Font("helv")`.
+Instead of simple, plain text, this method accepts HTML source, which may not only contain HTML tags but also styling instructions to influence things like font, font weight (bold) and style (italic), color and much more.
 
-Here is how to request Russian encoding with the standard font Helvetica::
+It is also possible to mix multiple fonts and languages, to output HTML tables and to insert images and URI links.
 
-    page.insert_text(point, russian_text, encoding=fitz.TEXT_ENCODING_CYRILLIC)
+For even more styling flexibility, an additional CSS source may also be given.
 
-The valid encoding values are TEXT_ENCODING_LATIN (0), TEXT_ENCODING_GREEK (1), and TEXT_ENCODING_CYRILLIC (2, Russian) with Latin being the default. Encoding can be specified by all relevant font and text insertion methods.
+The method is based on the :ref:`Story` class. Therefore, complex script systems like Devanagari, Nepali, Tamil and many are supported and written correctly thanks to using the HarfBuzz library - which provides this so-called **"text shaping"** feature.
 
-By the above statement, the fontname *helv* is automatically connected to the Russian font variant of Helvetica. Any subsequent text insertion with **this fontname** will use the Russian Helvetica encoding.
+Any required fonts to output characters are automatically pulled in from the Google NOTO font library - as a fallback (when the -- optionally supplied -- user font(s) do not contain some glyphs).
 
-If you change the fontname just slightly, you can also achieve an **encoding "mixture"** for the **same base font** on the same page::
+As a small glimpse into the features offered here, we will output the following HTML-enriched text::
 
-    import fitz
-    doc=fitz.open()
+    import pymupdf
+
+
+    rect = pymupdf.Rect(100, 100, 400, 300)
+
+    text = """Lorem ipsum dolor sit amet, consectetur adipisici elit, sed
+        eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad
+        minim veniam, quis nostrud exercitation <b>ullamco <i>laboris</i></b> 
+        nisi ut aliquid ex ea commodi consequat. Quis aute iure 
+        <span style="color: #f00;">reprehenderit</span> 
+        in <span style="color: #0f0;font-weight:bold;">voluptate</span> velit 
+        esse cillum dolore eu fugiat nulla pariatur. Excepteur sint obcaecat 
+        cupiditat non proident, sunt in culpa qui 
+        <a href="https://www.artifex.com">officia</a> deserunt mollit anim id 
+        est laborum."""
+
+    doc = pymupdf.Document()
+
     page = doc.new_page()
-    shape = page.new_shape()
-    t="Sômé tèxt wìth nöñ-Lâtîn characterß."
-    shape.insert_text((50,70), t, fontname="helv", encoding=fitz.TEXT_ENCODING_LATIN)
-    shape.insert_text((50,90), t, fontname="HElv", encoding=fitz.TEXT_ENCODING_GREEK)
-    shape.insert_text((50,110), t, fontname="HELV", encoding=fitz.TEXT_ENCODING_CYRILLIC)
-    shape.commit()
-    doc.save("t.pdf")
+    page.insert_htmlbox(rect, text, css="* {font-family: sans-serif;font-size:14px;}")
 
-The result:
+    doc.ez_save(__file__.replace(".py", ".pdf"))
 
-.. image:: images/img-encoding.*
-   :scale: 50
+Please note how the "css" parameter is used to globally select the default "sans-serif" font and a font size of 14.
 
-The snippet above indeed leads to three different copies of the Helvetica font in the PDF. Each copy is uniquely identified (and referenceable) by using the correct upper-lower case spelling of the reserved word "helv"::
+The result will look like this:
 
-    for f in doc.get_page_fonts(0): print(f)
+.. image:: images/img-htmlbox1.*
 
-    [6, 'n/a', 'Type1', 'Helvetica', 'helv', 'WinAnsiEncoding']
-    [7, 'n/a', 'Type1', 'Helvetica', 'HElv', 'WinAnsiEncoding']
-    [8, 'n/a', 'Type1', 'Helvetica', 'HELV', 'WinAnsiEncoding']
+How to output HTML tables and images
+.......................................
+
+Here is another example that outputs a table with this method. This time, we are including all the styling in the HTML source itself. Please also note, how it works to include an image - even within a table cell::
+
+    import pymupdf
+    import os
+
+    filedir = os.path.dirname(__file__)
+
+
+    text = """
+    <style>
+    body {
+        font-family: sans-serif;
+    }
+
+    td,
+    th {
+        border: 1px solid blue;
+        border-right: none;
+        border-bottom: none;
+        padding: 5px;
+        text-align: center;
+    }
+
+    table {
+        border-right: 1px solid blue;
+        border-bottom: 1px solid blue;
+        border-spacing: 0;
+    }
+    </style>
+
+    <body>
+    <p><b>Some Colors</b></p>
+    <table>
+        <tr>
+        <th>Lime</th>
+        <th>Lemon</th>
+        <th>Image</th>
+        <th>Mauve</th>
+        </tr>
+        <tr>
+        <td>Green</td>
+        <td>Yellow</td>
+        <td><img src="img-cake.png" width=50></td>
+        <td>Between<br>Gray and Purple</td>
+        </tr>
+    </table>
+    </body>
+    """
+
+    doc = pymupdf.Document()
+
+    page = doc.new_page()
+    rect = page.rect + (36, 36, -36, -36)
+
+    # we must specify an Archive because of the image
+    page.insert_htmlbox(rect, text, archive=pymupdf.Archive("."))
+
+    doc.ez_save(__file__.replace(".py", ".pdf"))
+
+
+
+The result will look like this:
+
+.. image:: images/img-htmlbox2.*
+
+
+How to Output Languages of the World
+.......................................
+
+Our third example will demonstrate the automatic multi-language support. It includes automatic **text shaping** for complex scripting systems like Devanagari and right-to-left languages::
+
+    import pymupdf
+
+    greetings = (
+        "Hello, World!",  # english
+        "Hallo, Welt!",  # german
+        "سلام دنیا!",  # persian
+        "வணக்கம், உலகம்!",  # tamil
+        "สวัสดีชาวโลก!",  # thai
+        "Привіт Світ!",  # ucranian
+        "שלום עולם!",  # hebrew
+        "ওহে বিশ্ব!",  # bengali
+        "你好世界！",  # chinese
+        "こんにちは世界！",  # japanese
+        "안녕하세요, 월드!",  # korean
+        "नमस्कार, विश्व !",  # sanskrit
+        "हैलो वर्ल्ड!",  # hindi
+    )
+    doc = pymupdf.open()
+    page = doc.new_page()
+    rect = (50, 50, 200, 500)
+
+    # join greetings into one text string
+    text = " ... ".join([t for t in greetings])
+
+    # the output of the above is simple:
+    page.insert_htmlbox(rect, text)
+    doc.save(__file__.replace(".py", ".pdf"))
+
+And this is the output:
+
+.. image:: images/img-htmlbox3.*
+
+How to Specify your Own Fonts
+.................................
+
+Define your font files in CSS syntax using the `@font-face` statement. You need a separate `@font-face` for every combination of font weight and font style (e.g. bold or italic) you want to be supported. The following example uses the famous MS Comic Sans font in its four variants regular, bold, italic and bold-italic.
+
+As these four font files are located in the system's folder `C:/Windows/Fonts` the method needs an :ref:`Archive` definition that points to that folder::
+
+    """
+    How to use your own fonts with method Page.insert_htmlbox().
+    """
+    import pymupdf
+
+    # Example text
+    text = """Lorem ipsum dolor sit amet, consectetur adipisici elit, sed
+        eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad
+        minim veniam, quis nostrud exercitation <b>ullamco <i>laboris</i></b> 
+        nisi ut aliquid ex ea commodi consequat. Quis aute iure 
+        <span style="color: red;">reprehenderit</span> 
+        in <span style="color: green;font-weight:bold;">voluptate</span> velit 
+        esse cillum dolore eu fugiat nulla pariatur. Excepteur sint obcaecat 
+        cupiditat non proident, sunt in culpa qui 
+        <a href="https://www.artifex.com">officia</a> deserunt mollit anim id 
+        est laborum."""
+
+    """
+    We need an Archive object to show where font files are located.
+    We intend to use the font family "MS Comic Sans".
+    """
+    arch = pymupdf.Archive("C:/Windows/Fonts")
+
+    # These statements define which font file to use for regular, bold,
+    # italic and bold-italic text.
+    # We assign an arbitrary common font-family for all 4 font files.
+    # The Story algorithm will select the right file as required.
+    # We request to use "comic" throughout the text.
+    css = """
+    @font-face {font-family: comic; src: url(comic.ttf);}
+    @font-face {font-family: comic; src: url(comicbd.ttf);font-weight: bold;}
+    @font-face {font-family: comic; src: url(comicz.ttf);font-weight: bold;font-style: italic;}
+    @font-face {font-family: comic; src: url(comici.ttf);font-style: italic;}
+    * {font-family: comic;}
+    """
+
+    doc = pymupdf.Document()
+    page = doc.new_page(width=150, height=150)  # make small page
+
+    page.insert_htmlbox(page.rect, text, css=css, archive=arch)
+
+    doc.subset_fonts(verbose=True)  # build subset fonts to reduce file size
+    doc.ez_save(__file__.replace(".py", ".pdf"))
+
+.. image:: images/img-htmlbox4.*
+
+How to Request Text Alignment
+................................
+
+This example combines multiple requirements:
+
+* Rotate the text by 90 degrees anti-clockwise.
+* Use a font from package `pymupdf-fonts <https://pypi.org/project/pymupdf-fonts/>`_. You will see that the respective CSS definitions are a lot easier in this case.
+* Align the text with the "justify" option.
+
+::
+
+    """
+    How to use a pymupdf font with method Page.insert_htmlbox().
+    """
+    import pymupdf
+
+    # Example text
+    text = """Lorem ipsum dolor sit amet, consectetur adipisici elit, sed
+        eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad
+        minim veniam, quis nostrud exercitation <b>ullamco <i>laboris</i></b> 
+        nisi ut aliquid ex ea commodi consequat. Quis aute iure 
+        <span style="color: red;">reprehenderit</span> 
+        in <span style="color: green;font-weight:bold;">voluptate</span> velit 
+        esse cillum dolore eu fugiat nulla pariatur. Excepteur sint obcaecat 
+        cupiditat non proident, sunt in culpa qui 
+        <a href="https://www.artifex.com">officia</a> deserunt mollit anim id 
+        est laborum."""
+
+    """
+    This is similar to font file support. However, we can use a convenience
+    function for creating required CSS definitions.
+    We still need an Archive for finding the font binaries.
+    """
+    arch = pymupdf.Archive()
+
+    # We request to use "myfont" throughout the text.
+    css = pymupdf.css_for_pymupdf_font("ubuntu", archive=arch, name="myfont")
+    css += "* {font-family: myfont;text-align: justify;}"
+
+    doc = pymupdf.Document()
+
+    page = doc.new_page(width=150, height=150)
+
+    page.insert_htmlbox(page.rect, text, css=css, archive=arch, rotate=90)
+
+    doc.subset_fonts(verbose=True)
+    doc.ez_save(__file__.replace(".py", ".pdf"))
+
+.. image:: images/img-htmlbox5.*
+
+
+|
+
+.. _RecipesText_J:
+
+
+How to Extract Text with Color
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Iterate through your text blocks and find the spans of text you need for this information.
+
+::
+
+    for page in doc:
+        text_blocks = page.get_text("dict", flags=pymupdf.TEXTFLAGS_TEXT)["blocks"]
+        for block in text_blocks:
+            for line in block["lines"]:
+                for span in line["spans"]:
+                    text = span["text"]
+                    color = pymupdf.sRGB_to_rgb(span["color"])
+                    print(f"Text: {text}, Color: {color}")
+
+
+
 
 .. include:: footer.rst

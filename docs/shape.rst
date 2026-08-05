@@ -5,6 +5,8 @@
 Shape
 ================
 
+|pdf_only_class|
+
 This class allows creating interconnected graphical elements on a PDF page. Its methods have the same meaning and name as the corresponding :ref:`Page` methods.
 
 In fact, each :ref:`Page` draw method is just a convenience wrapper for (1) one shape draw method, (2) the :meth:`Shape.finish` method, and (3) the :meth:`Shape.commit` method. For page text insertion, only the :meth:`Shape.commit` method is invoked. If many draw and text operations are executed for a page, you should always consider using a Shape object.
@@ -50,7 +52,7 @@ Several draw methods can be executed in a row and each one of them will contribu
 
    .. method:: __init__(self, page)
 
-      Create a new drawing. During importing PyMuPDF, the *fitz.Page* object is being given the convenience method *new_shape()* to construct a *Shape* object. During instantiation, a check will be made whether we do have a PDF page. An exception is otherwise raised.
+      Create a new drawing. During importing PyMuPDF, the *pymupdf.Page* object is being given the convenience method *new_shape()* to construct a *Shape* object. During instantiation, a check will be made whether we do have a PDF page. An exception is otherwise raised.
 
       :arg page: an existing page of a PDF document.
       :type page: :ref:`Page`
@@ -86,10 +88,10 @@ Several draw methods can be executed in a row and each one of them will contribu
 
       Here is an example of three connected lines, forming a closed, filled triangle. Little arrows indicate the stroking direction.
 
-         >>> import fitz
-         >>> doc=fitz.open()
+         >>> import pymupdf
+         >>> doc=pymupdf.open()
          >>> page=doc.new_page()
-         >>> r = fitz.Rect(100, 100, 300, 200)
+         >>> r = pymupdf.Rect(100, 100, 300, 200)
          >>> shape=page.new_shape()
          >>> shape.draw_squiggle(r.tl, r.tr)
          >>> shape.draw_squiggle(r.tr, r.br)
@@ -131,7 +133,7 @@ Several draw methods can be executed in a row and each one of them will contribu
 
       Draw a standard cubic Bézier curve from *p1* to *p4*, using *p2* and *p3* as control points.
 
-      All arguments are :data:`point_like` \s.
+      All arguments are :data:`point_like` objects.
 
       :rtype: :ref:`Point`
       :returns: the end point, *p4*.
@@ -232,21 +234,6 @@ Several draw methods can be executed in a row and each one of them will contribu
       :returns: :attr:`Quad.ul`.
 
    .. index::
-      pair: border_width; insert_text
-      pair: color; insert_text
-      pair: encoding; insert_text
-      pair: fill; insert_text
-      pair: fontfile; insert_text
-      pair: fontname; insert_text
-      pair: fontsize; insert_text
-      pair: morph; insert_text
-      pair: render_mode; insert_text
-      pair: rotate; insert_text
-      pair: stroke_opacity; insert_text
-      pair: fill_opacity; insert_text
-      pair: oc; insert_text
-
-   .. index::
       pair: closePath; finish
       pair: color; finish
       pair: dashes; finish
@@ -261,7 +248,7 @@ Several draw methods can be executed in a row and each one of them will contribu
       pair: oc; finish
 
 
-   .. method:: finish(width=1, color=None, fill=None, lineCap=0, lineJoin=0, dashes=None, closePath=True, even_odd=False, morph=(fixpoint, matrix), stroke_opacity=1, fill_opacity=1, oc=0)
+   .. method:: finish(width=1, color=(0,), fill=None, lineCap=0, lineJoin=0, dashes=None, closePath=True, even_odd=False, morph=(fixpoint, matrix), stroke_opacity=1, fill_opacity=1, oc=0)
 
       Finish a set of *draw*()* methods by applying :ref:`CommonParms` to all of them.
       
@@ -288,23 +275,39 @@ Several draw methods can be executed in a row and each one of them will contribu
 
          Of the four shapes in above image, the top two each show three circles drawn in standard manner (anti-clockwise, look at the arrows). The lower two shapes contain one (the top-left) circle drawn clockwise. As can be seen, area orientation is irrelevant for the right column (even-odd rule).
 
+   .. index::
+      pair: border_width; insert_text
+      pair: color; insert_text
+      pair: encoding; insert_text
+      pair: fill; insert_text
+      pair: fontfile; insert_text
+      pair: fontname; insert_text
+      pair: fontsize; insert_text
+      pair: lineheight; insert_text
+      pair: morph; insert_text
+      pair: render_mode; insert_text
+      pair: miter_limit; insert_text
+      pair: rotate; insert_text
+      pair: stroke_opacity; insert_text
+      pair: fill_opacity; insert_text
+      pair: oc; insert_text
 
-   .. method:: insert_text(point, text, fontsize=11, fontname="helv", fontfile=None, set_simple=False, encoding=TEXT_ENCODING_LATIN, color=None, lineheight=None, fill=None, render_mode=0, border_width=1, rotate=0, morph=None, stroke_opacity=1, fill_opacity=1, oc=0)
+   .. method:: insert_text(point, text, *, fontsize=11, fontname="helv", fontfile=None, set_simple=False, encoding=TEXT_ENCODING_LATIN, color=None, lineheight=None, fill=None, render_mode=0, miter_limit=1, border_width=1, rotate=0, morph=None, stroke_opacity=1, fill_opacity=1, oc=0)
 
-      Insert text lines start at *point*.
+      Insert text lines starting at ``point``.
 
       :arg point_like point: the bottom-left position of the first character of *text* in pixels. It is important to understand, how this works in conjunction with the *rotate* parameter. Please have a look at the following picture. The small red dots indicate the positions of *point* in each of the four possible cases.
 
          .. image:: images/img-inserttext.*
             :scale: 33
 
-      :arg str/sequence text: the text to be inserted. May be specified as either a string type or as a sequence type. For sequences, or strings containing line breaks *\n*, several lines will be inserted. No care will be taken if lines are too wide, but the number of inserted lines will be limited by "vertical" space on the page (in the sense of reading direction as established by the *rotate* parameter). Any rest of *text* is discarded -- the return code however contains the number of inserted lines.
+      :arg str/sequence text: the text to be inserted. May be specified as either a string type or as a sequence type. For sequences, or strings containing line breaks ``\n``, several lines will be inserted. No care will be taken if lines are too wide, but the number of inserted lines will be limited by "vertical" space on the page (in the sense of reading direction as established by the *rotate* parameter). Any rest of *text* is discarded -- the return code however contains the number of inserted lines.
 
-      :arg float lineheight: a factor to override the line height calculated from font properties. If not *None*, a line height of `fontsize * lineheight` will be used.
-      :arg float stroke_opacity: *(new in v1.18.1)* set transparency for stroke colors. Negative values and values > 1 will be ignored. Default is 1 (intransparent).
+      :arg float lineheight: a factor to override the line height calculated from font properties. If not `None`, a line height of `fontsize * lineheight` will be used.
+      :arg float stroke_opacity: *(new in v1.18.1)* set transparency for stroke colors (the **border line** of a character). Only  `0 <= value <= 1` will be considered. Default is 1 (intransparent).
       :arg float fill_opacity: *(new in v1.18.1)* set transparency for fill colors. Default is 1 (intransparent). Use this value to control transparency of the text color. Stroke opacity **only** affects the border line of characters.
 
-      :arg int rotate: determines whether to rotate the text. Acceptable values are multiples of 90 degrees. Default is 0 (no rotation), meaning horizontal text lines oriented from left to right. 180 means text is shown upside down from **right to left**. 90 means anti-clockwise rotation, text running **upwards**. 270 (or -90) means clockwise rotation, text running **downwards**. In any case, *point* specifies the bottom-left coordinates of the first character's rectangle. Multiple lines, if present, always follow the reading direction established by this parameter. So line 2 is located **above** line 1 in case of *rotate = 180*, etc.
+      :arg int rotate: determines whether to rotate the text. Acceptable values are multiples of 90 degrees. Default is 0 (no rotation), meaning horizontal text lines oriented from left to right. 180 means text is shown upside down from **right to left**. 90 means anti-clockwise rotation, text running **upwards**. 270 (or -90) means clockwise rotation, text running **downwards**. In any case, *point* specifies the bottom-left coordinates of the first character's rectangle. Multiple lines, if present, always follow the reading direction established by this parameter. So line 2 is located **above** line 1 in case of `rotate = 180`, etc.
 
       :arg int oc: *(new in v1.18.4)* the :data:`xref` number of an :data:`OCG` or :data:`OCMD` to make this text conditionally displayable.
 
@@ -323,14 +326,16 @@ Several draw methods can be executed in a row and each one of them will contribu
       pair: fontfile; insert_textbox
       pair: fontname; insert_textbox
       pair: fontsize; insert_textbox
+      pair: lineheight; insert_textbox
       pair: morph; insert_textbox
       pair: render_mode; insert_textbox
+      pair: miter_limit; insert_textbox
       pair: rotate; insert_textbox
       pair: oc; insert_textbox
 
-   .. method:: insert_textbox(rect, buffer, fontsize=11, fontname="helv", fontfile=None, set_simple=False, encoding=TEXT_ENCODING_LATIN, color=None, fill=None, render_mode=0, border_width=1, expandtabs=8, align=TEXT_ALIGN_LEFT, rotate=0, morph=None, stroke_opacity=1, fill_opacity=1, oc=0)
+   .. method:: insert_textbox(rect, buffer, *, fontsize=11, fontname="helv", fontfile=None, set_simple=False, encoding=TEXT_ENCODING_LATIN, color=None, fill=None, render_mode=0, miter_limit=1, border_width=1, expandtabs=8, align=TEXT_ALIGN_LEFT, rotate=0, lineheight=None, morph=None, stroke_opacity=1, fill_opacity=1, oc=0)
 
-      PDF only: Insert text into the specified rectangle. The text will be split into lines and words and then filled into the available space, starting from one of the four rectangle corners, which depends on *rotate*. Line feeds and multiple space will be respected.
+      PDF only: Insert text into the specified rectangle. The text will be split into lines and words and then filled into the available space, starting from one of the four rectangle corners, which depends on `rotate`. Line feeds and multiple space will be respected.
 
       :arg rect_like rect: the area to use. It must be finite and not empty.
 
@@ -338,12 +343,14 @@ Several draw methods can be executed in a row and each one of them will contribu
 
       :arg int align: align each text line. Default is 0 (left). Centered, right and justified are the other supported options, see :ref:`TextAlign`. Please note that the effect of parameter value *TEXT_ALIGN_JUSTIFY* is only achievable with "simple" (single-byte) fonts (including the :ref:`Base-14-Fonts`).
 
-      :arg int expandtabs: controls handling of tab characters *\t* using the *string.expandtabs()* method **per each line**.
+      :arg float lineheight: a factor to override the line height calculated from font properties. If not `None`, a line height of `fontsize * lineheight` will be used.
+
+         :arg int expandtabs: controls handling of tab characters ``\t`` using the `string.expandtabs()` method **per each line**.
 
       :arg float stroke_opacity: *(new in v1.18.1)* set transparency for stroke colors. Negative values and values > 1 will be ignored. Default is 1 (intransparent).
       :arg float fill_opacity: *(new in v1.18.1)* set transparency for fill colors. Default is 1 (intransparent). Use this value to control transparency of the text color. Stroke opacity **only** affects the border line of characters.
 
-      :arg int rotate: requests text to be rotated in the rectangle. This value must be a multiple of 90 degrees. Default is 0 (no rotation). Effectively, four different values are processed: 0, 90, 180 and 270 (= -90), each causing the text to start in a different rectangle corner. Bottom-left is 90, bottom-right is 180, and -90 / 270 is top-right. See the example how text is filled in a rectangle. This argument takes precedence over morphing. See the second example, which shows text first rotated left by 90 degrees and then the whole rectangle rotated clockwise around is lower left corner.
+      :arg int rotate: requests text to be rotated in the rectangle. This value must be a multiple of 90 degrees. Default is 0 (no rotation). Effectively, the four values `0`, `90`, `180` and `270` (= `-90`) are processed, each causing the text to start in a different rectangle corner. Bottom-left is `90`, bottom-right is `180`, and `-90 / 270` is top-right. See the example how text is filled in a rectangle. This argument takes precedence over morphing. See the second example, which shows text first rotated left by `90` degrees and then the whole rectangle rotated clockwise around is lower left corner.
 
       :arg int oc: *(new in v1.18.4)* the :data:`xref` number of an :data:`OCG` or :data:`OCMD` to make this text conditionally displayable.
 
@@ -424,7 +431,7 @@ Several draw methods can be executed in a row and each one of them will contribu
          >>> # assuming ...
          >>> morph = (point, matrix)
          >>> # ... recalculate the shape rectangle like so:
-         >>> shape.rect = (shape.rect - fitz.Rect(point, point)) * ~matrix + fitz.Rect(point, point)
+         >>> shape.rect = (shape.rect - pymupdf.Rect(point, point)) * ~matrix + pymupdf.Rect(point, point)
 
       :type: :ref:`Rect`
 
@@ -479,8 +486,8 @@ Examples
       cols = (...)  # a sequence of RGB color triples
       pieces = len(cols)  # number of pieces to draw
       beta = 360. / pieces  # angle of each piece of pie
-      center = fitz.Point(...)  # center of the pie
-      p0 = fitz.Point(...)  # starting point
+      center = pymupdf.Point(...)  # center of the pie
+      p0 = pymupdf.Point(...)  # starting point
       for i in range(pieces):
           p0 = shape.draw_sector(center, p0, beta,
                                 fullSector=True) # draw piece
@@ -496,8 +503,8 @@ Here is an example for 5 colors:
 
       shape = page.new_shape() # start a new shape
       beta = -360.0 / n  # our angle, drawn clockwise
-      center = fitz.Point(...)  # center of circle
-      p0 = fitz.Point(...)  # start here (1st edge)
+      center = pymupdf.Point(...)  # center of circle
+      p0 = pymupdf.Point(...)  # start here (1st edge)
       points = [p0]  # store polygon edges
       for i in range(n):  # calculate the edges
           p0 = shape.draw_sector(center, p0, beta)
@@ -550,7 +557,7 @@ Common Parameters
 
 **dashes** (*str*)
 
-  Causes lines to be drawn dashed. The general format is `"[n m] p"` of (up to) 3 floats denoting pixel lengths. `n` is the dash length, `m` (optional) is the subsequent gap length, and `p` (the "phase" - **required**, even if 0!) specifies how many pixels should be skipped before the dashing starts. If `m` is omitted, it defaults to `n`.
+  Causes lines to be drawn dashed. The general format is `"[n m] p"` of (up to) 3 floats denoting pixel lengths. ``n`` is the dash length, ``m`` (optional) is the subsequent gap length, and ``p`` (the "phase" - **required**, even if 0!) specifies how many pixels should be skipped before the dashing starts. If ``m`` is omitted, it defaults to ``n``.
   
   A continuous line (no dashes) is drawn with `"[] 0"` or *None* or `""`. Examples:
   
@@ -565,7 +572,7 @@ Common Parameters
 
   Stroke and fill colors can be specified as tuples or list of of floats from 0 to 1. These sequences must have a length of 1 (GRAY), 3 (RGB) or 4 (CMYK). For GRAY colorspace, a single float instead of the unwieldy *(float,)* or *[float]* is also accepted. Accept (default) or use `None` to not use the parameter.
 
-  To simplify color specification, method *getColor()* in *fitz.utils* may be used to get predefined RGB color triples by name. It accepts a string as the name of the color and returns the corresponding triple. The method knows over 540 color names -- see section :ref:`ColorDatabase`.
+  To simplify color specification, method *getColor()* in *pymupdf.utils* may be used to get predefined RGB color triples by name. It accepts a string as the name of the color and returns the corresponding triple. The method knows over 540 color names -- see section :ref:`ColorDatabase`.
 
   Please note that the term *color* usually means "stroke" color when used in conjunction with fill color.
 
@@ -573,11 +580,20 @@ Common Parameters
 
 ----
 
+**width** (*float*)
+
+  The stroke ("border") width of the elements in a shape (if applicable). The default value is 1. The values width, color and fill have the following relationship / dependency:
+
+  * If `fill=None` shape elements will always be drawn with a border - even if `color=None` (in which case black is taken) or `width=0` (in which case 1 is taken).
+  * Shapes without border can only be achieved if a fill color is specified (which may be white of course). To achieve this, specify `width=0`. In this case, the ``color`` parameter is ignored.
+
+----
+
 **stroke_opacity / fill_opacity** (*floats*)
 
   Both values are floats in range [0, 1]. Negative values or values > 1 will ignored (in most cases). Both set the transparency such that a value 0.5 corresponds to 50% transparency, 0 means invisible and 1 means intransparent. For e.g. a rectangle the stroke opacity applies to its border and fill opacity to its interior.
 
-  For text insertions (:meth:`Shape.insert_text` and :meth:`Shape.insert_textbox`), use *fill_opacity* for the text. At first sight this seems surprising, but it becomes obvious when you look further down to *render_mode*: *fill_opacity* applies to the yellow and *stroke_opacity* applies to the blue color.
+  For text insertions (:meth:`Shape.insert_text` and :meth:`Shape.insert_textbox`), use *fill_opacity* for the text. At first sight this seems surprising, but it becomes obvious when you look further down to `render_mode`: `fill_opacity` applies to the yellow and `stroke_opacity` applies to the blue color.
 
 ----
 
@@ -599,6 +615,28 @@ Common Parameters
   The following examples use border_width=0.3, together with a fontsize of 15. Stroke color is blue and fill color is some yellow.
 
   .. image:: images/img-rendermode.*
+
+----
+
+**miter_limit** (*float*)
+
+  A float specifying the maximum acceptable value of the quotient `miter-length / line-width` ("miter quotient"). Used in text output methods. This is only relevant for non-zero render mode values -- then, characters are written with border lines (i.e. "stroked").
+  
+  If two lines stroking some character meet at a sharp (<= 90°) angle and the line width is large enough, then "spikes" may become visible -- causing an ugly appearance as shown below. For more background, see page 126 of the :ref:`AdobeManual`.
+    
+  For instance, when joins meet at 90°, then the miter length is ``sqrt(2) * line-width``, so the miter quotient is ``sqrt(2)``.
+  
+  If ``miter_limit`` is exceeded, then all joins with a larger qotient will appear as beveled ("butt" appearance).
+    
+  The default value 1 (and any smaller value) will ensure that all joins are rendered as a butt. A value of ``None`` will use the PDF default value.
+  
+  Example text showing spikes (``miter_limit=None``):
+
+  .. image:: images/spikes-yes.*
+
+  Example text suppressing spikes (``miter_limit=1``):
+
+  .. image:: images/spikes-no.*
 
 ----
 

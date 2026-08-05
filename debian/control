@@ -2,22 +2,31 @@ Source: pymupdf
 Section: python
 Priority: optional
 Maintainer: Debian Python Team <team+python@tracker.debian.org>
-Uploaders: Johannes 'josch' Schauer <josch@debian.org>
 Homepage: https://github.com/pymupdf/PyMuPDF
 Vcs-Browser: https://salsa.debian.org/python-team/packages/pymupdf
 Vcs-Git: https://salsa.debian.org/python-team/packages/pymupdf.git
-Standards-Version: 4.5.1
+Standards-Version: 4.7.0
 Build-Depends: debhelper-compat (= 13), dh-python, pybuild-plugin-pyproject,
- python3-all-dev:any, libpython3-all-dev, libmupdf-dev (>= 1.23), libmujs-dev,
- libjbig2dec-dev, libjpeg-dev, libfreetype-dev, libpng-dev,
- libopenjp2-7-dev, libharfbuzz-dev, swig, libgumbo-dev
+ python3-all-dev:any, libpython3-all-dev, libmupdf-dev (>= 1.25),
+ swig, python3-mupdf, python3-pytest <!nocheck>, python3-psutil <!nocheck>,
 Rules-Requires-Root: no
 
 Package: python3-fitz
+Architecture: all
+Depends: ${misc:Depends}, ${python3:Depends}, python3-pymupdf (>= ${source:Version})
+Description: Python binding for MuPDF (forward compatibility name)
+ Allows one to access files in PDF, XPS, OpenXPS, CBZ, EPUB, and FB2 (e-books)
+ formats, and it is known for its top performance and high rendering quality.
+ .
+ PDF manipulation and generation functions are available, including metadata
+ and bookmark maintenance, document restructuring, annotation / link handling
+ and document or page creation.
+ .
+ Provides a Python module fitz, which is PyMuPDF's old module name.
+
+Package: python3-pymupdf
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, ${python3:Depends}
-Provides: ${python3:Provides}
-Built-Using: ${Built-Using}
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${python3:Depends}, python3-mupdf (>= 1.25.1+ds1-6)
 Description: Python binding for MuPDF
  Allows one to access files in PDF, XPS, OpenXPS, CBZ, EPUB, and FB2 (e-books)
  formats, and it is known for its top performance and high rendering quality.

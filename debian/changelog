@@ -1,3 +1,93 @@
+pymupdf (1.25.4+ds1-3+deb13u1) trixie; urgency=medium
+
+  * Backport upstream fix for CVE-2026-3029:
+    Improved safety of `pymupdf embed-extract`. This now refuses to write to
+    an existing file or outside current directory, unless `-output` or new flag
+    `-unsafe` is specified.
+
+ -- Bastian Germann <bage@debian.org>  Sun, 22 Mar 2026 23:52:49 +0100
+
+pymupdf (1.25.4+ds1-3) unstable; urgency=medium
+
+  * debian/control: require at least python3-mupdf 1.25.1+ds1-6
+
+ -- Johannes Schauer Marin Rodrigues <josch@debian.org>  Wed, 23 Apr 2025 13:08:38 +0200
+
+pymupdf (1.25.4+ds1-2) unstable; urgency=medium
+
+  * Team upload
+  * Run tests
+
+ -- Bastian Germann <bage@debian.org>  Tue, 22 Apr 2025 17:23:33 +0200
+
+pymupdf (1.25.4+ds1-1) unstable; urgency=medium
+
+  * Team upload
+  * New upstream version 1.25.4+ds1
+
+ -- Bastian Germann <bage@debian.org>  Tue, 18 Mar 2025 22:42:45 +0100
+
+pymupdf (1.25.0+ds1-2) unstable; urgency=medium
+
+  * Team upload
+  * Move to unstable (Closes: #1092613)
+
+ -- Bastian Germann <bage@debian.org>  Tue, 14 Jan 2025 20:07:18 +0100
+
+pymupdf (1.25.0+ds1-1) experimental; urgency=medium
+
+  * Team upload
+  * Add binary package python3-pymupdf
+
+  [ Daniel Echeverri ]
+  * New upstream release (Closes: #1081712)
+  * debian/control
+    + Update to libmupdf-dev >= 1.25
+    + Add python3-mupdf and python3-sphinx in B-D
+  * debian/patches
+    + Refresh docs patch
+    + Remove fitz_old.patch because fitz_old was remove in 1.24.3
+  * debian/tests/control
+    +  Update test to import fitz instead fitz_old
+  * debian/python3-fitz.lintian-overrides
+    + remove unused lintian override
+  * debian/tests
+    + Add pytests file
+  * debian/copyright
+    + Add myself in debian copyright
+  * Update d/clean file
+
+ -- Bastian Germann <bage@debian.org>  Wed, 08 Jan 2025 21:09:39 +0100
+
+pymupdf (1.24.2+ds1-3) unstable; urgency=medium
+
+  * Team upload
+  * Make pymupdf run with fitz_old (Closes: #1075969)
+
+ -- Bastian Germann <bage@debian.org>  Fri, 12 Jul 2024 21:19:20 +0200
+
+pymupdf (1.24.2+ds1-2) unstable; urgency=medium
+
+  * Team upload
+  * Revert "Link with shared mupdf library"
+
+ -- Bastian Germann <bage@debian.org>  Tue, 25 Jun 2024 18:32:32 +0200
+
+pymupdf (1.24.2+ds1-1) experimental; urgency=medium
+
+  * Team upload
+  * Link with shared mupdf library
+
+  [ Bo YU ]
+  * New upstream version 1.24.2+ds1 (Closes: #1064772)
+  * Rebase debian/patch
+  * Update spelling-error-in-binary lintian for binary package
+  * Update debian/copyright
+  * Set std-ver to 4.7.0
+  * Add upstream-metadata-missing-repository
+
+ -- Bastian Germann <bage@debian.org>  Sat, 25 May 2024 12:58:53 +0000
+
 pymupdf (1.23.7+ds1-1) unstable; urgency=medium
 
   * Team upload
