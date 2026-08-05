@@ -1,0 +1,5 @@
+usr/bin/pymupdf
+usr/lib/python*/dist-packages/*.jpg
+usr/lib/python*/dist-packages/*.pdf
+usr/lib/python*/dist-packages/PyMuPDF-linx-fds*
+usr/lib/python*/dist-packages/.pytest_cache

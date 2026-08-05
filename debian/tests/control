@@ -1,4 +1,8 @@
 Test-Command: env --chdir=/ python3 -c "import fitz"
 Restrictions: allow-stderr, superficial
-Depends: python3-fitz
+Depends: python3-fitz,python3-mupdf
 Features: test-name=python3-fitz
+
+Tests: pytests
+Restrictions: allow-stderr
+Depends: python3-fitz,python3-all,python3-pytest,python3-mupdf (>= 1.25.1+ds1-6),python3-psutil

@@ -20,15 +20,15 @@ The transformation matrix contains information about how an image was transforme
 The relationship between image dimension and its bbox on a page is the following:
 
 1. Using the original image's width and height,
-    - define the image rectangle `imgrect = fitz.Rect(0, 0, width, height)`
-    - define the "shrink matrix" `shrink = fitz.Matrix(1/width, 0, 0, 1/height, 0, 0)`.
+    - define the image rectangle `imgrect = pymupdf.Rect(0, 0, width, height)`
+    - define the "shrink matrix" `shrink = pymupdf.Matrix(1/width, 0, 0, 1/height, 0, 0)`.
 
-2. Transforming the image rectangle with its shrink matrix, will result in the unit rectangle: `imgrect * shrink = fitz.Rect(0, 0, 1, 1)`.
+2. Transforming the image rectangle with its shrink matrix, will result in the unit rectangle: `imgrect * shrink = pymupdf.Rect(0, 0, 1, 1)`.
 
 3. Using the image **transformation matrix** "transform", the following steps will compute the bbox::
 
-    imgrect = fitz.Rect(0, 0, width, height)
-    shrink = fitz.Matrix(1/width, 0, 0, 1/height, 0, 0)
+    imgrect = pymupdf.Rect(0, 0, width, height)
+    shrink = pymupdf.Matrix(1/width, 0, 0, 1/height, 0, 0)
     bbox = imgrect * shrink * transform
 
 4. Inspecting the matrix product `shrink * transform` will reveal all information about what happened to the image rectangle to make it fit into the bbox on the page: rotation, scaling of its sides and translation of its origin. Let us look at an example:
@@ -39,8 +39,8 @@ The relationship between image dimension and its bbox on a page is the following
     >>> #------------------------------------------------
     >>> # define image shrink matrix and rectangle
     >>> #------------------------------------------------
-    >>> shrink = fitz.Matrix(1 / 439, 0, 0, 1 / 501, 0, 0)
-    >>> imgrect = fitz.Rect(0, 0, 439, 501)
+    >>> shrink = pymupdf.Matrix(1 / 439, 0, 0, 1 / 501, 0, 0)
+    >>> imgrect = pymupdf.Rect(0, 0, 439, 501)
     >>> #------------------------------------------------
     >>> # determine image bbox and transformation matrix:
     >>> #------------------------------------------------
@@ -59,7 +59,7 @@ The relationship between image dimension and its bbox on a page is the following
     >>> # the above shows:
     >>> # image sides are scaled by same factor ~0.4,
     >>> # and the image is rotated by 90 degrees clockwise
-    >>> # compare this with fitz.Matrix(-90) * 0.4
+    >>> # compare this with pymupdf.Matrix(-90) * 0.4
     >>> #------------------------------------------------
 
 
@@ -71,7 +71,7 @@ PDF Base 14 Fonts
 ---------------------
 The following 14 builtin font names **must be supported by every PDF viewer** application. They are available as a dictionary, which maps their full names amd their abbreviations in lower case to the full font basename. Wherever a **fontname** must be provided in PyMuPDF, any **key or value** from the dictionary may be used::
 
-    In [2]: fitz.Base14_fontdict
+    In [2]: pymupdf.Base14_fontdict
     Out[2]:
     {'courier': 'Courier',
     'courier-oblique': 'Courier-Oblique',
@@ -137,16 +137,16 @@ For example, specifying a sequence `"s"` in any of the following ways
 
 will make it usable in the following example expressions:
 
-* `fitz.Point(s)`
-* `fitz.Point(x, y) + s`
+* `pymupdf.Point(s)`
+* `pymupdf.Point(x, y) + s`
 * `doc.select(s)`
 
 Similarly with all geometry objects :ref:`Rect`, :ref:`IRect`, :ref:`Matrix` and :ref:`Point`.
 
 Because all PyMuPDF geometry classes themselves are special cases of sequences, they (with the exception of :ref:`Quad` -- see below) can be freely used where numerical sequences can be used, e.g. as arguments for functions like *list()*, *tuple()*, *array.array()* or *numpy.array()*. Look at the following snippet to see this work.
 
->>> import fitz, array, numpy as np
->>> m = fitz.Matrix(1, 2, 3, 4, 5, 6)
+>>> import pymupdf, array, numpy as np
+>>> m = pymupdf.Matrix(1, 2, 3, 4, 5, 6)
 >>>
 >>> list(m)
 [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
@@ -170,9 +170,9 @@ Ensuring Consistency of Important Objects in PyMuPDF
 ------------------------------------------------------------
 PyMuPDF is a Python binding for the C library MuPDF. While a lot of effort has been invested by MuPDF's creators to approximate some sort of an object-oriented behavior, they certainly could not overcome basic shortcomings of the C language in that respect.
 
-Python on the other hand implements the OO-model in a very clean way. The interface code between PyMuPDF and MuPDF consists of two basic files: *fitz.py* and *fitz_wrap.c*. They are created by the excellent SWIG tool for each new version.
+Python on the other hand implements the OO-model in a very clean way. The interface code between PyMuPDF and MuPDF consists of two basic files: *pymupdf.py* and *fitz_wrap.c*. They are created by the excellent SWIG tool for each new version.
 
-When you use one of PyMuPDF's objects or methods, this will result in execution of some code in *fitz.py*, which in turn will call some C code compiled with *fitz_wrap.c*.
+When you use one of PyMuPDF's objects or methods, this will result in execution of some code in *pymupdf.py*, which in turn will call some C code compiled with *fitz_wrap.c*.
 
 Because SWIG goes a long way to keep the Python and the C level in sync, everything works fine, if a certain set of rules is being strictly followed. For example: **never access** a :ref:`Page` object, after you have closed (or deleted or set to *None*) the owning :ref:`Document`. Or, less obvious: **never access** a page or any of its children (links or annotations) after you have executed one of the document methods *select()*, *delete_page()*, *insert_page()* ... and more.
 
@@ -213,11 +213,11 @@ RuntimeError: orphaned object: parent is None
 
 This shows the cascading effect:
 
->>> doc = fitz.open("some.pdf")
+>>> doc = pymupdf.open("some.pdf")
 >>> page = doc[n]
 >>> annot = page.first_annot
 >>> page.rect
-fitz.Rect(0.0, 0.0, 595.0, 842.0)
+pymupdf.Rect(0.0, 0.0, 595.0, 842.0)
 >>> annot.type
 [5, 'Circle']
 >>> del doc                       # or doc = None or doc.close()
@@ -294,11 +294,131 @@ This design approach ensures that:
 
 .. _RedirectMessages:
 
-Redirecting Error and Warning Messages
---------------------------------------------
-Since MuPDF version 1.16 error and warning messages can be redirected via an official plugin.
+Diagnostics
+----------------------------
 
-PyMuPDF will put error messages to `sys.stderr` prefixed with the string "mupdf:". Warnings are internally stored and can be accessed via *fitz.TOOLS.mupdf_warnings()*. There also is a function to empty this store.
+.. _Messages:
+
+|PyMuPDF| messages
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+|PyMuPDF| has a Message system for showing text diagnostics.
+
+By default messages are written to `sys.stdout`. This can be controlled in
+two ways:
+
+*
+  Set environment variable `PYMUPDF_MESSAGE` before |PyMuPDF| is imported.
+
+*
+  Call `set_messages()`:
+
+
+MuPDF errors and warnings
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+MuPDF generates text errors and warnings.
+
+*
+  These errors and warnings are appended to an internal list, accessible with
+  `Tools.mupdf_warnings()`. Also see `Tools.reset_mupdf_warnings()`.
+
+*
+  By default these errors and warnings are also sent to the |PyMuPDF| message
+  system.
+  
+  * This can be controlled with `mupdf_display_errors()` and
+    `mupdf_display_warnings()`.
+  
+  *
+    These messages are prefixed with `MuPDF error:` and `MuPDF warning:`
+    respectively.
+  
+Some MuPDF errors may lead to Python exceptions.
+
+Example output for a **recoverable error**. We are opening a damaged PDF, but MuPDF is able to repair it and gives us a little information on what happened. Then we illustrate how to find out whether the document can later be saved incrementally. Checking the :attr:`Document.is_dirty` attribute at this point also indicates that during `pymupdf.open` the document had to be repaired:
+
+>>> import pymupdf
+>>> doc = pymupdf.open("damaged-file.pdf")  # leads to a sys.stderr message:
+mupdf: cannot find startxref
+>>> print(pymupdf.TOOLS.mupdf_warnings())  # check if there is more info:
+cannot find startxref
+trying to repair broken xref
+repairing PDF document
+object missing 'endobj' token
+>>> doc.can_save_incrementally()  # this is to be expected:
+False
+>>> # the following indicates whether there are updates so far
+>>> # this is the case because of the repair actions:
+>>> doc.is_dirty
+True
+>>> # the document has nevertheless been created:
+>>> doc
+pymupdf.Document('damaged-file.pdf')
+>>> # we now know that any save must occur to a new file
+
+Example output for an **unrecoverable error**:
+
+>>> import pymupdf
+>>> doc = pymupdf.open("does-not-exist.pdf")
+mupdf: cannot open does-not-exist.pdf: No such file or directory
+Traceback (most recent call last):
+  File "<pyshell#1>", line 1, in <module>
+    doc = pymupdf.open("does-not-exist.pdf")
+  File "C:\Users\Jorj\AppData\Local\Programs\Python\Python37\lib\site-packages\fitz\pymupdf.py", line 2200, in __init__
+    _pymupdf.Document_swiginit(self, _pymupdf.new_Document(filename, stream, filetype, rect, width, height, fontsize))
+RuntimeError: cannot open does-not-exist.pdf: No such file or directory
+>>>
+
+
+
+.. _Coordinates:
+
+Coordinates
+--------------------------------------------
+
+
+This is one of the most frequently used terms in this documentation. A **coordinate** generally means a pair of numbers `(x, y)` referring to some location, like a corner of a rectangle (:ref:`Rect`), a :ref:`Point` and so forth. The two values usually are floats, but there a objects like images which only allow them to be integers.
+
+To actually *find* a coordinate's location, we also need to know the *reference* point for ``x`` and ``y`` - in other words, we must know where location `(0, 0)` is positioned. Once `(0, 0)` (the "origin") is known, we speak of a "coordinate system".
+
+Several coordinate systems exist in document processing. For instance, the coordinate systems of a PDF page and the image created from it are **different**. We therefore need ways to *transform* coordinates from one system to another (and also back occasionally). This is the task of a :ref:`Matrix`. It is a mathematical function which works much like a factor that can be "multiplied" with a point or rectangle to give us the corresponding point / rectangle in another coordinate system. The inverse of a transformation matrix can be used to revert the transformation. Much like multiplying by some factor, say 3, can be reverted by dividing the result by 3 (or multiplying it with 1/3).
+
+Coordinates and Images
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Images have a coordinate system with integer coordinates. Origin `(0, 0)` is the top-left point. ``x`` values must be in `range(width)`, and ``y`` values in `range(height)`. Therefore, ``y`` values *increase* if we go *downwards*. For every image, there is only a **finite number** of coordinates, namely `width * height`. A location in an image is also called a "pixel".
+
+- How **large** an image will be (in centimeters or inches) when e.g. printed, depends on additional information: the "resolution". This is measured in **DPI** (dots per inch, or pixels per inch). To find the printed size of some image, we therefore must divide its width and its height by the corresponding DPI values (there may separate ones for width and for height) and will get the respective number of inches.
+
+
+Origin Point, Point Size and Y-Axis
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In **PDF**, the origin `(0, 0)` of a page is located at its **bottom-left point**. In **MuPDF**, the origin `(0, 0)` of a page is located at its **top-left point**.
+
+
+.. image:: images/img-coordinate-space.png
+
+Coordinates are float numbers and measured in **points**, where:
+
+- **one point equals 1/72 inches**.
+
+Typical document page sizes are **ISO A4** and **Letter**. A **Letter** page has a size of **8.5 x 11 inches**, corresponding to **612 x 792 points**. In the **PDF** coordinate system, the top-left point of a **Letter** page hence has the coordinate `(0, 792)` as **the y-axis points upwards**. Now we know our document size the **MuPDF** coordinate system for the bottom right would be coordinate `(612, 792)` (and for **PDF** this coordinate would then be `(612,0)`).
+
+- Theoretically, there are **infinitely many** coordinate positions on a **PDF** page. In practice however, at most the first 5 decimal places are sufficient for a reasonable precision.
+
+
+- In **MuPDF**, multiple document formats are supported - **PDF** just being one among **over a dozen others**. Images are also supported as documents in **MuPDF** (therefore having one page usually). This is one of the reasons why **MuPDF** uses a coordinate system with the origin `(0, 0)` being the **top-left** point of any document page. **The y-axis points downwards**, like with images. Coordinates in **MuPDF** in any case are floats, like in **PDF**.
+
+- A rectangle `Rect(0, 0, 100, 100)` for instance in **MuPDF** (and thus **PyMuPDF**) therefore is a square with edges of length 100 points (= 1.39 inches or 3.53 centimeters). Its top-left corner is the origin. To switch between the two coordinate systems **PDF** to **MuPDF**, every :ref:`Page` object has a :attr:`Page.transformation_matrix`. Its inverse can be used to compute a rectangle's PDF coordinates. In this way we can conveniently find that `Rect(0, 0, 100, 100)` in **MuPDF** is the same as `Rect(0, 692, 100, 792)` in **PDF**. See this code snippet::
+
+    >>> page = doc.new_page(width=612, height=792)  # make new Letter page
+    >>> ptm = page.transformation_matrix
+    >>> # the inverse matrix of ptm is ~ptm
+    >>> pymupdf.Rect(0, 0, 100, 100) * ~ptm
+    Rect(0.0, 692.0, 100.0, 792.0)
+
 
 
 .. rubric:: Footnotes
@@ -307,5 +427,8 @@ PyMuPDF will put error messages to `sys.stderr` prefixed with the string "mupdf:
 
     1. The target PDF is not new / empty: grafting does not check for resources that already existed (e.g. images, fonts) in the target document before opening it.
     2. Using :meth:`Page.show_pdf_page` for more than one source document: each grafting occurs **within one source** PDF only, not across multiple. So if e.g. the same image exists in pages from different source PDFs, then this will not be detected until garbage collection.
+
+
+
 
 .. include:: footer.rst

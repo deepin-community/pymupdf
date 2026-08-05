@@ -14,12 +14,13 @@ import io
 import sqlite3
 import sys
 
-import fitz
+import pymupdf
 
 """
 Table data. Used to populate a temporary SQL database, which will be processed by the script.
 Its only purpose is to avoid carrying around a separate database file.
 """
+# codespell:ignore-begin
 table_data = """China;Beijing;21542000;1.5%;2018
 Japan;Tokyo;13921000;11.2%;2019
 DR Congo;Kinshasa;12691000;13.2%;2017
@@ -260,6 +261,7 @@ Palau;Ngerulmud;271;1.5%;2010
 Cocos (Keeling) Islands (Australia);West Island;134;24.6%;2011
 Pitcairn Islands (UK);Adamstown;40;100.0%;2021
 South Georgia and the South Sandwich Islands (UK);King Edward Point;22;73.3%;2018"""
+# codespell:ignore-end
 
 # -------------------------------------------------------------------
 # HTML template for the report. We define no table header <th> items
@@ -312,7 +314,7 @@ def recorder(elpos):
     if elpos.id not in ("row", "country", "capital", "population", "percent", "year"):
         return  # only look at row / cell content
 
-    rect = fitz.Rect(elpos.rect)  # cell rectangle
+    rect = pymupdf.Rect(elpos.rect)  # cell rectangle
     if rect.y1 > elpos.filled:  # ignore stuff below the filled rectangle
         return
 
@@ -355,7 +357,7 @@ select = """SELECT * FROM capitals ORDER BY "Country" """
 # -------------------------------------------------------------------
 # define the HTML Story and fill it with database data
 # -------------------------------------------------------------------
-story = fitz.Story(HTML, user_css=CSS)
+story = pymupdf.Story(HTML, user_css=CSS)
 body = story.body  # access the HTML body detail
 
 template = body.find(None, "id", "row")  # find the template part
@@ -384,8 +386,8 @@ template.remove()  # remove the template
 # generate the PDF and write it to memory
 # -------------------------------------------------------------------
 fp = io.BytesIO()
-writer = fitz.DocumentWriter(fp)
-mediabox = fitz.paper_rect("letter")  # use pages in Letter format
+writer = pymupdf.DocumentWriter(fp)
+mediabox = pymupdf.paper_rect("letter")  # use pages in Letter format
 where = mediabox + (36, 36, -36, -72)  # leave page borders
 more = True
 page = 0
@@ -405,7 +407,7 @@ writer.close()  # close the PDF
 # -------------------------------------------------------------------
 # re-open memory PDF for inserting gridlines and header rows
 # -------------------------------------------------------------------
-doc = fitz.open("pdf", fp)
+doc = pymupdf.open("pdf", fp)
 for page in doc:
     page.wrap_contents()  # ensure all "cm" commands are properly wrapped
     x, y, x1, y0 = coords[page.number]  # read coordinates of the page
@@ -435,11 +437,11 @@ for page in doc:
 
     # Write page footer
     y0 = page.rect.height - 50  # top coordinate of footer bbox
-    bbox = fitz.Rect(0, y0, page.rect.width, y0 + 20)  # footer bbox
+    bbox = pymupdf.Rect(0, y0, page.rect.width, y0 + 20)  # footer bbox
     page.insert_textbox(
         bbox,
         f"World Capital Cities, Page {page.number+1} of {doc.page_count}",
-        align=fitz.TEXT_ALIGN_CENTER,
+        align=pymupdf.TEXT_ALIGN_CENTER,
     )
     shape.finish(width=0.3, color=0.5, fill=0.9)  # rectangles and gray lines
     shape.commit(overlay=False)  # put the drawings in background

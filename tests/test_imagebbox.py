@@ -7,12 +7,12 @@ Ensure equality of bboxes computed via
 """
 import os
 
-import fitz
+import pymupdf
 
 scriptdir = os.path.abspath(os.path.dirname(__file__))
 filename = os.path.join(scriptdir, "resources", "image-file1.pdf")
 image = os.path.join(scriptdir, "resources", "img-transparent.png")
-doc = fitz.open(filename)
+doc = pymupdf.open(filename)
 
 
 def test_image_bbox():
@@ -22,6 +22,7 @@ def test_image_bbox():
     for item in imglist:
         bbox_list.append(page.get_image_bbox(item, transform=False))
     infos = page.get_image_info(xrefs=True)
+    match = False
     for im in infos:
         bbox1 = im["bbox"]
         match = False
@@ -34,7 +35,7 @@ def test_image_bbox():
 
 
 def test_bboxlog():
-    doc = fitz.open()
+    doc = pymupdf.open()
     page = doc.new_page()
     xref = page.insert_image(page.rect, filename=image)
     img_info = page.get_image_info(xrefs=True)
